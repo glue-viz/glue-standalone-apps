@@ -25,5 +25,7 @@ jobs:
         python-version: 3.9
     - name: Install pyinstaller
       run: pip install pyinstaller
+    - name: Install glue
+      run: pip install glueviz
     - name: Run pyinstaller
       run: pyinstaller ${{ matrix.specfile }}
