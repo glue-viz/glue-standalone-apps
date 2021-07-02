@@ -1,0 +1,29 @@
+name: Build Applications
+
+on:
+  push:
+    branches:
+    - master
+    tags:
+    - '*'
+
+jobs:
+  build_applications:
+    name: ${{ matrix.os }} with ${{ matrix.specfile }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-10.15, ubuntu-18.04, windows-2016]
+        specfile: [glue_app_bundle.spec, glue_app_onefile.spec]
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    - name: Install pyinstaller
+      run: pip install pyinstaller
+    - name: Run pyinstaller
+      run: pyinstaller ${{ matrix.specfile }}
