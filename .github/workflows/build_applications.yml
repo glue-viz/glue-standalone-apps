@@ -27,7 +27,7 @@ jobs:
     - name: Install pyinstaller
       run: pip install pyinstaller
     - name: Install glue
-      run: pip install glueviz
+      run: pip install glueviz PyQt5
     - name: Run pyinstaller
       run: pyinstaller ${{ matrix.specfile }}
     - name: Upload artifact
