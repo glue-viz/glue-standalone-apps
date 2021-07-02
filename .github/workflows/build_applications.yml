@@ -29,3 +29,8 @@ jobs:
       run: pip install glueviz
     - name: Run pyinstaller
       run: pyinstaller ${{ matrix.specfile }}
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ matrix.os }}_${{ matrix.specfile }}
+        path: dist

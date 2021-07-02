@@ -16,7 +16,7 @@ block_cipher = None
 #notebooks = [(x, 'app_notebooks') for x in glob.glob(os.path.join('app_notebooks', '*.ipynb'))]
 
 a = Analysis(['start_glue.py'],
-             pathex=['glue'],
+             pathex=['start-glue'],
              binaries=[],
              #datas=notebooks,
              hiddenimports=['voila',
@@ -47,7 +47,7 @@ exe = EXE(pyz,
           a.scripts,
           [],
           exclude_binaries=True,
-          name='glue',
+          name='start_glue',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
@@ -61,7 +61,7 @@ coll = COLLECT(exe,
                a.datas,
                strip=False,
                upx=False,
-               name='glue')
+               name='start_glue')
 
 app = BUNDLE(coll,
              name='glue.app',
