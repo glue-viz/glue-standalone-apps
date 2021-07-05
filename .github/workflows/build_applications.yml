@@ -26,11 +26,17 @@ jobs:
     - name: Install pyinstaller
       run: pip install pyinstaller
     - name: Install glue
-      run: pip install glueviz PyQt5
+      run: pip install glueviz PyQt5==5.11.3
     - name: Run pyinstaller
       run: pyinstaller ${{ matrix.specfile }}
+    - name: Remove unused directory
+      run: rm -rf dist/start_glue
+    - name: Fix MacOS X application
+      run: python fix_osx.py dist/glue.app
+    - name: Create DMG
+      run: hdiutil create -volname "Glue" -srcfolder dist -ov -format UDZO glue.dmg
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
         name: ${{ matrix.os }}_${{ matrix.specfile }}
-        path: dist
+        path: glue.dmg
