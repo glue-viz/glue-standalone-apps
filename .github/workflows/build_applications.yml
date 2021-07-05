@@ -31,8 +31,8 @@ jobs:
       run: pyinstaller ${{ matrix.specfile }}
     - name: Remove unused directory
       run: rm -rf dist/start_glue
-    - name: Fix MacOS X application
-      run: python fix_osx.py dist/glue.app
+    #- name: Fix MacOS X application
+    #  run: python fix_osx.py dist/glue.app
     - name: Create DMG
       run: hdiutil create -volname "Glue" -srcfolder dist -ov -format UDZO glue.dmg
     - name: Upload artifact
