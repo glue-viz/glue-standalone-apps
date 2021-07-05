@@ -38,5 +38,4 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-        name: ${{ matrix.os }}_${{ matrix.specfile }}
         path: glue.dmg
