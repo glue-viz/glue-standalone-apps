@@ -14,8 +14,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-10.15, ubuntu-18.04, windows-2016]
-        specfile: [glue_app_bundle.spec, glue_app_onefile.spec]
+        os: [macos-10.15]
+        specfile: [glue_app_bundle.spec]
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
