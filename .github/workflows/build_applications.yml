@@ -24,7 +24,7 @@ jobs:
       with:
         python-version: 3.8
     - name: Install pyinstaller
-      run: pip install pyinstaller
+      run: pip install git+https://github.com/pyinstaller/pyinstaller
     - name: Install glue
       run: pip install glueviz PyQt5==5.11.3
     - name: Run pyinstaller
