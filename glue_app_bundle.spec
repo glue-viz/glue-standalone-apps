@@ -31,7 +31,7 @@ a = Analysis(['start_glue.py'],
                             'astropy'],
              hookspath=['hooks'],
              runtime_hooks=[],
-             excludes=['tkinter'],
+             excludes=['tkinter', 'PyQt5.QtQml'],
              win_no_prefer_redirects=False,
              win_private_assemblies=False,
              cipher=block_cipher)
