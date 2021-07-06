@@ -35,7 +35,10 @@ jobs:
     #  run: python fix_osx.py dist/glue.app
     - name: Create DMG
       run: hdiutil create -volname "Glue" -srcfolder dist -ov -format UDZO glue.dmg
-    - name: Upload artifact
-      uses: actions/upload-artifact@v2
-      with:
-        path: glue.dmg
+    - name: Install awscli
+      run: pip install awscli
+    - name: Upload to S3
+      run: aws s3 cp glue.dmg s3://glue-installers-exp/
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
