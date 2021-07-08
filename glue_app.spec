@@ -7,7 +7,7 @@ import glob
 if os.name == 'nt':
     icon = os.path.abspath('icon.ico')
 elif sys.platform == 'darwin':
-    icon = os.path.abspath('icon.icns')
+    icon = os.path.abspath(os.path.join('osx', 'icon.icns'))
 else:
     icon = None
 

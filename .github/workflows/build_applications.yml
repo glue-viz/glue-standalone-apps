@@ -9,13 +9,12 @@ on:
 
 jobs:
   build_applications:
-    name: ${{ matrix.os }} with ${{ matrix.specfile }}
+    name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [macos-10.15, ubuntu-18.04, windows-2016]
-        specfile: [glue_app_bundle.spec, glue_app_onefile.spec]
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -28,11 +27,11 @@ jobs:
     - name: Install glue
       run: pip install glueviz PyQt5==5.11.3
     - name: Run pyinstaller
-      run: pyinstaller ${{ matrix.specfile }}
+      run: pyinstaller glue_app.spec
     - name: Remove unused directory
       run: rm -rf dist/start_glue
     - name: Fix MacOS X application
-      run: python fix_app_qt_folder_names_for_codesign.py dist/glue.app
+      run: python osx/fix_app_qt_folder_names_for_codesign.py dist/glue.app
     - name: Re-run codesign
       run: codesign -s - --force --all-architectures --timestamp --deep dist/glue.app
     - name: Create DMG
