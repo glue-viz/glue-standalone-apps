@@ -34,7 +34,10 @@ jobs:
     - name: Install awscli
       run: pip install awscli
     - name: Upload to S3
-      run: aws s3 cp * s3://glue-installers-exp/
+      shell: bash
+      run: |
+        ls
+        aws s3 cp * s3://glue-installers-exp/
       working-directory: dist
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
