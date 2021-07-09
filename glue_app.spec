@@ -6,10 +6,13 @@ import glob
 
 if os.name == 'nt':
     icon = os.path.abspath('icon.ico')
+    onefile = True
 elif sys.platform == 'darwin':
     icon = os.path.abspath(os.path.join('osx', 'icon.icns'))
+    onefile = False
 else:
     icon = None
+    onefile = True
 
 block_cipher = None
 
@@ -39,30 +42,47 @@ a = Analysis(['start_glue.py'],
 pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 
-exe = EXE(pyz,
-          a.scripts,
-          [],
-          exclude_binaries=True,
-          name='start_glue',
-          debug=False,
-          bootloader_ignore_signals=False,
-          strip=False,
-          upx=False,
-          console=False,
-          icon=icon)
+if onefile:
 
-coll = COLLECT(exe,
-               a.binaries,
-               a.zipfiles,
-               a.datas,
-               strip=False,
-               upx=False,
-               name='start_glue')
+    exe = EXE(pyz,
+            a.scripts,
+            a.binaries,
+            a.zipfiles,
+            a.datas,
+            name='start_glue',
+            debug=False,
+            bootloader_ignore_signals=False,
+            strip=False,
+            upx=False,
+            console=True,
+            icon=icon)
 
-app = BUNDLE(coll,
-             name='glue.app',
-             icon=icon,
-             info_plist={
-             'NSHighResolutionCapable': 'True'
-             },
-             bundle_identifier='org.qt-project.Qt.QtWebEngineCore')
+else:
+
+    exe = EXE(pyz,
+            a.scripts,
+            [],
+            exclude_binaries=True,
+            name='start_glue',
+            debug=False,
+            bootloader_ignore_signals=False,
+            strip=False,
+            upx=False,
+            console=False,
+            icon=icon)
+
+    coll = COLLECT(exe,
+                a.binaries,
+                a.zipfiles,
+                a.datas,
+                strip=False,
+                upx=False,
+                name='start_glue')
+
+    app = BUNDLE(coll,
+                name='glue.app',
+                icon=icon,
+                info_plist={
+                'NSHighResolutionCapable': 'True'
+                },
+                bundle_identifier='org.qt-project.Qt.QtWebEngineCore')
