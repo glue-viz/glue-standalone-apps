@@ -49,7 +49,7 @@ if onefile:
             a.binaries,
             a.zipfiles,
             a.datas,
-            name='start_glue',
+            name='glue',
             debug=False,
             bootloader_ignore_signals=False,
             strip=False,
