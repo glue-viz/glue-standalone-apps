@@ -27,7 +27,7 @@ jobs:
     - name: Install developer version of vispy
       run: pip install git+https://github.com/vispy/vispy
     - name: Install glue
-      run: pip install glueviz PyQt5==5.11.3
+      run: pip install glueviz glue-wwt PyQt5==5.11.3
     - name: Run pyinstaller
       run: pyinstaller glue_app.spec
     - name: Prepare MacOS X application and make dmg
