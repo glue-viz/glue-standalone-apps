@@ -21,6 +21,7 @@ block_cipher = None
 a = Analysis(['start_glue.py'],
              pathex=['start-glue'],
              binaries=[],
+             hiddenimports=['glue_vispy_viewers'],
              hookspath=['hooks'],
              runtime_hooks=[],
              excludes=['tkinter', 'PyQt5.QtQml'],
