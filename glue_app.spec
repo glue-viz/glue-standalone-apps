@@ -32,49 +32,49 @@ a = Analysis(['start_glue.py'],
              cipher=block_cipher)
 
 pyz = PYZ(a.pure, a.zipped_data,
-             cipher=block_cipher)
+          cipher=block_cipher)
 
 if onefile:
 
     exe = EXE(pyz,
-            a.scripts,
-            a.binaries,
-            a.zipfiles,
-            a.datas,
-            name='glue',
-            debug=False,
-            bootloader_ignore_signals=False,
-            strip=False,
-            upx=False,
-            console=True,
-            icon=icon)
+              a.scripts,
+              a.binaries,
+              a.zipfiles,
+              a.datas,
+              name='glue',
+              debug=False,
+              bootloader_ignore_signals=False,
+              strip=False,
+              upx=False,
+              console=True,
+              icon=icon)
 
 else:
 
     exe = EXE(pyz,
-            a.scripts,
-            [],
-            exclude_binaries=True,
-            name='start_glue',
-            debug=False,
-            bootloader_ignore_signals=False,
-            strip=False,
-            upx=False,
-            console=False,
-            icon=icon)
+              a.scripts,
+              [],
+              exclude_binaries=True,
+              name='start_glue',
+              debug=False,
+              bootloader_ignore_signals=False,
+              strip=False,
+              upx=False,
+              console=False,
+              icon=icon)
 
     coll = COLLECT(exe,
-                a.binaries,
-                a.zipfiles,
-                a.datas,
-                strip=False,
-                upx=False,
-                name='start_glue')
+                   a.binaries,
+                   a.zipfiles,
+                   a.datas,
+                   strip=False,
+                   upx=False,
+                   name='start_glue')
 
     app = BUNDLE(coll,
-                name='glue.app',
-                icon=icon,
-                info_plist={
-                'NSHighResolutionCapable': 'True'
-                },
-                bundle_identifier='org.qt-project.Qt.QtWebEngineCore')
+                 name='glue.app',
+                 icon=icon,
+                 info_plist={
+                     'NSHighResolutionCapable': 'True'
+                 },
+                 bundle_identifier='org.qt-project.Qt.QtWebEngineCore')
