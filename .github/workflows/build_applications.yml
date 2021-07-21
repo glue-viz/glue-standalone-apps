@@ -26,8 +26,10 @@ jobs:
       run: pip install git+https://github.com/pyinstaller/pyinstaller
     - name: Install old version of ipykernel to avoid terminal issues
       run: pip install "ipykernel<6"
+    - name: Install developer version of pywwt
+      run: pip install git+https://github.com/WorldWideTelescope/pywwt
     - name: Install glue
-      run: pip install pip install git+https://github.com/Carifio24/glue@polar-fix glue-vispy-viewers glue-wwt PyQt5==5.14.2 PyQtWebEngine==5.14.0
+      run: pip install git+https://github.com/Carifio24/glue@polar-fix glue-vispy-viewers glue-wwt PyQt5==5.14.2 PyQtWebEngine==5.14.0
     - name: Run pyinstaller
       run: pyinstaller glue_app.spec
     - name: Prepare MacOS X application and make dmg
