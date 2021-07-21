@@ -21,11 +21,9 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.9
+        python-version: 3.8
     - name: Install pyinstaller
       run: pip install git+https://github.com/pyinstaller/pyinstaller
-    - name: Install developer version of vispy
-      run: pip install git+https://github.com/vispy/vispy
     - name: Install old version of ipykernel to avoid terminal issues
       run: pip install "ipykernel<6"
     - name: Install glue
