@@ -21,7 +21,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.8
+        python-version: 3.9
     - name: Install pyinstaller
       run: pip install git+https://github.com/pyinstaller/pyinstaller
     - name: Install developer version of vispy
@@ -29,7 +29,7 @@ jobs:
     - name: Install old version of ipykernel to avoid terminal issues
       run: pip install "ipykernel<6"
     - name: Install glue
-      run: pip install glueviz glue-wwt PyQt5==5.11.3
+      run: pip install pip install git+https://github.com/Carifio24/glue@polar-fix glue-vispy-viewers glue-wwt PyQt5==5.14.2 PyQtWebEngine==5.14.0
     - name: Run pyinstaller
       run: pyinstaller glue_app.spec
     - name: Prepare MacOS X application and make dmg
