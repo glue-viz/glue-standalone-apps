@@ -26,6 +26,8 @@ jobs:
       run: pip install git+https://github.com/pyinstaller/pyinstaller
     - name: Install old version of ipykernel to avoid terminal issues
       run: pip install "ipykernel<6"
+    - name: Install old version of astropy to avoid astropy.units issue
+      run: pip install "astropy<4.3"
     - name: Install developer version of pywwt
       run: pip install git+https://github.com/WorldWideTelescope/pywwt
     - name: Install glue
