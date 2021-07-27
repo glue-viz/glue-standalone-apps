@@ -2,9 +2,12 @@ import os
 import sys
 import time
 
+from pywwt import qt
 from glue import load_plugins
 from glue.logger import logger
 from glue.app.qt import GlueApplication
+
+qt.APP_LIVELINESS_DEADLINE = 60
 
 os.environ['QTWEBENGINE_CHROMIUM_FLAGS'] = '--ignore-gpu-blacklist'
 
