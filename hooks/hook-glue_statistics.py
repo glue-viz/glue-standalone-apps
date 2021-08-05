@@ -1,4 +1,4 @@
 from PyInstaller.utils.hooks import collect_data_files, copy_metadata
 
-datas = collect_data_files('StatsDataViewer', include_py_files=True)
-datas += copy_metadata('StatsDataViewer')
+datas = collect_data_files('glue_statistics', include_py_files=True)
+datas += copy_metadata('glue-statistics')
