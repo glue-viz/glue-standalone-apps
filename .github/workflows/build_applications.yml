@@ -33,7 +33,7 @@ jobs:
     - name: Install glue
       run: pip install git+https://github.com/Carifio24/glue@polar-fix glue-vispy-viewers glue-wwt PyQt5==5.14.2 PyQtWebEngine==5.14.0
     - name: Install plugins
-      run: pip install git+https://github.com/glue-viz/glue-plotly git+https://github.com/jk31768/glue-statistics
+      run: pip install git+https://github.com/glue-viz/glue-plotly git+https://github.com/jk31768/glue-statistics git+https://github.com/glue-viz/glue-geospatial.git
     - name: Run pyinstaller
       run: pyinstaller glue_app.spec
     - name: Prepare MacOS X application and make dmg
