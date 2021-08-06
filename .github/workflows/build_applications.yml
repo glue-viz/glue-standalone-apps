@@ -36,6 +36,8 @@ jobs:
       run: pip install git+https://github.com/glue-viz/glue-plotly git+https://github.com/jk31768/glue-statistics
     - name: Run pyinstaller
       run: pyinstaller glue_app.spec
+    - name: Uninstall lxml
+      run: pip uninstall lxml
     - name: Prepare MacOS X application and make dmg
       if: matrix.os == 'macos-10.15'
       run: osx/make_dmg.sh
