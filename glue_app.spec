@@ -25,8 +25,7 @@ a = Analysis(['start_glue.py'],
                             'vispy',
                             'glue_wwt',
                             'glue_plotly',
-                            'glue_statistics',
-                            'glue_geospatial'],
+                            'glue_statistics'],
              hookspath=['hooks'],
              runtime_hooks=[],
              excludes=['tkinter', 'PyQt5.QtQml'],
@@ -78,6 +77,11 @@ else:
                  name='glue.app',
                  icon=icon,
                  info_plist={
+                    'CFBundleName': 'Glue',
+                    'CFBundleDisplayName': 'Glue',
+                    'CFBundleVersion': "0.1",
+                    'CFBundleShortVersionString': "0.1",
                      'NSHighResolutionCapable': 'True'
                  },
-                 bundle_identifier='org.qt-project.Qt.QtWebEngineCore')
+                 bundle_identifier='com.gluesolutions.Glue')
+
