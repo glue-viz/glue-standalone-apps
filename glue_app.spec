@@ -83,5 +83,5 @@ else:
                     'CFBundleShortVersionString': "0.1",
                      'NSHighResolutionCapable': 'True'
                  },
-                 bundle_identifier='com.gluesolutions.Glue')
+                 bundle_identifier='io.gluesolutions.Glue')
 
