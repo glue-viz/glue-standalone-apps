@@ -3,7 +3,7 @@ name: Build Applications
 on:
   push:
     branches:
-    - master
+    - main
     tags:
     - '*'
 
