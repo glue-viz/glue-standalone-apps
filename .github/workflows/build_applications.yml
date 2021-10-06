@@ -31,7 +31,7 @@ jobs:
     - name: Install developer version of pywwt
       run: pip install git+https://github.com/WorldWideTelescope/pywwt
     - name: Install glue
-      run: pip install git+https://github.com/Carifio24/glue@polar-fix glue-vispy-viewers glue-wwt PyQt5==5.14.2 PyQtWebEngine==5.14.0
+      run: pip install glue-core glue-vispy-viewers glue-wwt PyQt5==5.14.2 PyQtWebEngine==5.14.0
     - name: Install plugins
       run: pip install git+https://github.com/glue-viz/glue-plotly git+https://github.com/jk31768/glue-statistics
     - name: Run pyinstaller
