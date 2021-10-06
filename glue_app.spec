@@ -77,11 +77,11 @@ else:
                  name='glue.app',
                  icon=icon,
                  info_plist={
-                    'CFBundleName': 'Glue',
-                    'CFBundleDisplayName': 'Glue',
-                    'CFBundleVersion': "0.1",
-                    'CFBundleShortVersionString': "0.1",
+                    'CFBundleName': 'glueviz',
+                    'CFBundleDisplayName': 'glueviz',
+                    'CFBundleVersion': "1.0",
+                    'CFBundleShortVersionString': "1.0",
                      'NSHighResolutionCapable': 'True'
                  },
-                 bundle_identifier='io.gluesolutions.Glue')
+                 bundle_identifier='io.gluesolutions.glueviz')
 
