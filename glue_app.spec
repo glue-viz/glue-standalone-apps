@@ -79,8 +79,8 @@ else:
                  info_plist={
                     'CFBundleName': 'glueviz',
                     'CFBundleDisplayName': 'glueviz',
-                    'CFBundleVersion': "1.0",
-                    'CFBundleShortVersionString': "1.0",
+                    'CFBundleVersion': "1.2",
+                    'CFBundleShortVersionString': "1.2",
                      'NSHighResolutionCapable': 'True'
                  },
                  bundle_identifier='io.gluesolutions.glueviz')
