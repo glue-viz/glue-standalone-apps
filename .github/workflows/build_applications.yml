@@ -47,7 +47,7 @@ jobs:
       run: pip uninstall -y lxml
     - name: Prepare application for distribution
       shell: bash
-      run: prepare_{$RUNNER_OS,}.sh ${GITHUB_REF##*/}
+      run: ./prepare_"$RUNNER_OS".sh ${GITHUB_REF##*/}
     - name: Install awscli
       run: pip install awscli
     - name: Upload to S3
