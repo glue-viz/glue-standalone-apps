@@ -52,6 +52,7 @@ jobs:
       run: pip install awscli
     - name: Upload to S3
       shell: bash
+      if: github.event_name != 'pull_request'
       run: aws s3 cp * s3://glueviz/installers/
       working-directory: dist
       env:
