@@ -33,14 +33,8 @@ jobs:
       with:
         python-version: 3.9
 
-    - name: Install pyinstaller
-      run: pip install git+https://github.com/pyinstaller/pyinstaller
-    - name: Install old version of ipykernel to avoid terminal issues
-      run: pip install "ipykernel<6"
-    - name: Install glue
-      run: pip install glue-core glue-vispy-viewers glue-wwt PyQt5==5.14.2 PyQtWebEngine==5.14.0
-    - name: Install plugins
-      run: pip install git+https://github.com/glue-viz/glue-plotly git+https://github.com/jk31768/glue-statistics
+    - name: Install Python dependencies
+      run: pip install -r requirements.txt
     - name: Run pyinstaller
       run: pyinstaller glue_app.spec
     - name: Uninstall lxml
