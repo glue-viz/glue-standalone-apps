@@ -35,14 +35,12 @@ To run this locally, follow the same steps as in `build_applications.yml
 <https://github.com/glue-viz/glue-standalone-apps/blob/main/.github/workflows/build_applications.yml>`_.
 You should always do this in a clean virtual environment or conda environment as
 otherwise PyInstaller might pull in unrelated dependencies. A simplified version
-of running this locally would be:
+of running this locally would be::
 
-```
-python3.9 -m venv test-app
-source test-app/bin/activate
-pip install git+https://github.com/pyinstaller/pyinstaller
-pip install glue-core glue-vispy-viewers glue-wwt PyQt5==5.14.2 PyQtWebEngine==5.14.0
-pyinstaller glue_app.spec
-```
+    python3.9 -m venv test-app
+    source test-app/bin/activate
+    pip install git+https://github.com/pyinstaller/pyinstaller
+    pip install glue-core glue-vispy-viewers glue-wwt PyQt5==5.14.2 PyQtWebEngine==5.14.0
+    pyinstaller glue_app.spec
 
 The resulting application will be in the ``dist/`` folder.
