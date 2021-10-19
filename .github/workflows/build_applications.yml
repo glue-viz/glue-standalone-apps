@@ -44,14 +44,20 @@ jobs:
       run: ./prepare_"$RUNNER_OS".sh ${GITHUB_REF##*/}
     - name: Output list of included packages
       if: matrix.os == 'ubuntu-18.04'
-      run: pip freeze > dist/included-packages.txt
+      run: pip freeze > included-packages.txt
     - name: Install awscli
       run: pip install awscli
-    - name: Upload to S3
+    - name: Upload glue to S3
       shell: bash
       if: github.event_name != 'pull_request'
-      run: aws s3 cp * s3://glueviz/installers/${GITHUB_REF##*/}/
+      run: aws s3 cp glue* s3://glueviz/installers/${GITHUB_REF##*/}/
       working-directory: dist
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    - name: Upload package list to S3
+      if: github.event_name != 'pull_request' && matrix.os == 'ubuntu-18.04'
+      run: aws s3 cp included-packages.txt s3://glueviz/installers/${GITHUB_REF##*/}/
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
