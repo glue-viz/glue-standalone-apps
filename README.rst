@@ -3,7 +3,11 @@ About
 
 This repository is used to build standalone 'single-file' versions of the glue
 application. It uses the `pyinstaller <https://pypi.org/project/pyinstaller/>`_
-package running on GitHub Actions.
+package running on GitHub Actions. You can find all available built versions
+at http://glueviz.s3.amazonaws.com/installers/download.html.
+
+For maintainers
+===============
 
 Anytime a commit is made to this repository, the workflow in
 `build_applications.yml
