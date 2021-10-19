@@ -6,6 +6,13 @@ application. It uses the `pyinstaller <https://pypi.org/project/pyinstaller/>`_
 package running on GitHub Actions. You can find all available built versions
 at http://glueviz.s3.amazonaws.com/installers/download.html.
 
+Versioning
+==========
+
+Since these are bundles of packages rather than a single package, we use `calendar
+versioning <https://calver.org/>`_ with the format ``YYYY.MM.MICRO`` for the
+main bundles.
+
 For maintainers
 ===============
 
