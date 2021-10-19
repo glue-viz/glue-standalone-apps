@@ -42,6 +42,9 @@ jobs:
     - name: Prepare application for distribution
       shell: bash
       run: ./prepare_"$RUNNER_OS".sh ${GITHUB_REF##*/}
+    - name: Output list of included packages
+      if: matrix.os == 'ubuntu-18.04'
+      run: pip freeze > dist/included-packages.txt
     - name: Install awscli
       run: pip install awscli
     - name: Upload to S3
