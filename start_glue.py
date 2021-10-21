@@ -17,6 +17,11 @@ load_plugins()
 
 if __name__ == "__main__":
 
+    if '--debug' in sys.argv:
+        import faulthandler
+        faulthandler.enable()
+
+
     ga = GlueApplication()
 
     if '--test' in sys.argv:
