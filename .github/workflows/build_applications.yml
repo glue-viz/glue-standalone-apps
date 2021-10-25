@@ -34,7 +34,7 @@ jobs:
         python-version: 3.9
 
     - name: Install apt dependencies
-      run: apt-get install python3-pyqt5
+      run: sudo apt-get install -y python3-pyqt5 python3-pyqt5.qtwebengine
     - name: Install Python dependencies
       run: pip install -r requirements.txt
     - name: Run pyinstaller
