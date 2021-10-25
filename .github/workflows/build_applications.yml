@@ -20,35 +20,24 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    # Not all dependencies work correctly on Python 3.9 on Windows yet so we use
-    # Python 3.8 there.
-    - name: Set up Python 3.8
-      if: matrix.os == 'windows-2016'
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
-    - name: Set up Python 3.9
-      if: matrix.os != 'windows-2016'
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
+
 
     - name: Install apt dependencies
-      run: sudo apt-get install -y python3-pyqt5 python3-pyqt5.qtwebengine
+      run: sudo apt-get install -y python3-pyqt5 python3-pyqt5.qtwebengine python3-pip
     - name: Install Python dependencies
-      run: pip install -r requirements.txt
+      run: python3 -m pip install -r requirements.txt
     - name: Run pyinstaller
       run: pyinstaller glue_app.spec
     - name: Uninstall lxml
-      run: pip uninstall -y lxml
+      run: python3 -m pip uninstall -y lxml
     - name: Prepare application for distribution
       shell: bash
       run: ./prepare_"$RUNNER_OS".sh ${GITHUB_REF##*/}
     - name: Output list of included packages
       if: matrix.os == 'ubuntu-18.04'
-      run: pip freeze > included-packages.txt
+      run: python3 -m pip freeze > included-packages.txt
     - name: Install awscli
-      run: pip install awscli
+      run: python3 -m pip install awscli
     - name: Upload glue to S3
       shell: bash
       if: github.event_name != 'pull_request'
