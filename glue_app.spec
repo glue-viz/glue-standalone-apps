@@ -2,7 +2,6 @@
 
 import os
 import sys
-import glob
 
 if os.name == 'nt':
     icon = os.path.abspath('icon.ico')
@@ -15,8 +14,6 @@ else:
     onefile = True
 
 block_cipher = None
-
-#notebooks = [(x, 'app_notebooks') for x in glob.glob(os.path.join('app_notebooks', '*.ipynb'))]
 
 a = Analysis(['start_glue.py'],
              pathex=['start-glue'],
@@ -63,7 +60,8 @@ else:
               strip=False,
               upx=False,
               console=False,
-              icon=icon)
+              icon=icon,
+              argv_emulation=True)
 
     coll = COLLECT(exe,
                    a.binaries,
@@ -81,7 +79,10 @@ else:
                     'CFBundleDisplayName': 'glueviz',
                     'CFBundleVersion': "1.2",
                     'CFBundleShortVersionString': "1.2",
-                     'NSHighResolutionCapable': 'True'
+                    'NSHighResolutionCapable': 'True',
+                    'CFBundleDocumentTypes': [{
+                        'CFBundleTypeName': 'Glue Session Files',
+                        'CFBundleTypeExtensions': ['glu'],
+                        'CFBundleTypeRole': "Viewer"}]
                  },
                  bundle_identifier='io.gluesolutions.glueviz')
-
