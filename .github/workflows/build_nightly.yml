@@ -1,11 +1,11 @@
-name: Build Applications
+name: Build nightly bundles
 
 on:
+  schedule:
+    - cron: '0 3 * * *'
   push:
     branches:
-    - '*'
-    tags:
-    - '*'
+    - 'main'
 
 jobs:
   build_applications:
@@ -34,14 +34,16 @@ jobs:
         python-version: 3.9
 
     - name: Install Python dependencies
-      run: pip install -r requirements.txt
+      run: pip install -r requirements_nightly.txt
     - name: Run pyinstaller
       run: pyinstaller glue_app.spec
     - name: Uninstall lxml
       run: pip uninstall -y lxml
+    - name: Set version environment variable
+      run: export $VERSION=`date '+%Y.%m.%d.%H.%M.%S'`
     - name: Prepare application for distribution
       shell: bash
-      run: ./prepare_"$RUNNER_OS".sh ${GITHUB_REF##*/}
+      run: ./prepare_"$RUNNER_OS".sh $VERSION
     - name: Output list of included packages
       if: matrix.os == 'ubuntu-18.04'
       run: pip freeze > included-packages.txt
@@ -50,7 +52,7 @@ jobs:
     - name: Upload glue to S3
       shell: bash
       if: github.event_name != 'pull_request'
-      run: aws s3 cp glue* s3://glueviz/installers/${GITHUB_REF##*/}/
+      run: aws s3 cp glue* s3://glueviz/installers/$VERSION/
       working-directory: dist
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}

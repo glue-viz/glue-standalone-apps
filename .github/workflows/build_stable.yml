@@ -1,0 +1,63 @@
+name: Build stable bundles
+
+on:
+  push:
+    branches:
+    - '*'
+    tags:
+    - '*'
+
+jobs:
+  build_applications:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-10.15, ubuntu-18.04, windows-2016]
+    steps:
+
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    # Not all dependencies work correctly on Python 3.9 on Windows yet so we use
+    # Python 3.8 there.
+    - name: Set up Python 3.8
+      if: matrix.os == 'windows-2016'
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    - name: Set up Python 3.9
+      if: matrix.os != 'windows-2016'
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+
+    - name: Install Python dependencies
+      run: pip install -r requirements.txt
+    - name: Run pyinstaller
+      run: pyinstaller glue_app.spec
+    - name: Uninstall lxml
+      run: pip uninstall -y lxml
+    - name: Prepare application for distribution
+      shell: bash
+      run: ./prepare_"$RUNNER_OS".sh ${GITHUB_REF##*/}
+    - name: Output list of included packages
+      if: matrix.os == 'ubuntu-18.04'
+      run: pip freeze > included-packages.txt
+    - name: Install awscli
+      run: pip install awscli
+    - name: Upload glue to S3
+      shell: bash
+      if: github.event_name != 'pull_request'
+      run: aws s3 cp glue* s3://glueviz/installers/${GITHUB_REF##*/}/
+      working-directory: dist
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    - name: Upload package list to S3
+      if: github.event_name != 'pull_request' && matrix.os == 'ubuntu-18.04'
+      run: aws s3 cp included-packages.txt s3://glueviz/installers/${GITHUB_REF##*/}/
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
