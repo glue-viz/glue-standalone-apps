@@ -24,6 +24,11 @@ a = Analysis(['start_glue.py'],
                             'glue_plotly',
                             'glue_statistics'],
              hookspath=['hooks'],
+             hooksconfig={
+                "matplotlib": {
+                    "backends": "all"
+                },
+             },
              runtime_hooks=[],
              excludes=['tkinter', 'PyQt5.QtQml'],
              win_no_prefer_redirects=False,
