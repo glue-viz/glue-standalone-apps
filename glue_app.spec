@@ -22,6 +22,7 @@ a = Analysis(
     hiddenimports=[
         "glue_vispy_viewers",
         "vispy",
+        "notebook",
         "glue_wwt",
         "glue_plotly",
         "glue_statistics",
