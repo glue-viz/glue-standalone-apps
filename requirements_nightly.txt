@@ -4,7 +4,7 @@ glue-core
 glue-vispy-viewers
 glue-wwt
 glue-plotly
-pywwt==0.12.0
+pywwt
 notebook
 numpy<1.22
 astropy<5.0
