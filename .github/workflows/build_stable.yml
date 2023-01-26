@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-10.15, ubuntu-18.04, windows-2016]
+        os: [macos-10.15, ubuntu-18.04, windows-2019]
     steps:
 
     - name: Checkout code
@@ -23,12 +23,12 @@ jobs:
     # Not all dependencies work correctly on Python 3.9 on Windows yet so we use
     # Python 3.8 there.
     - name: Set up Python 3.8
-      if: matrix.os == 'windows-2016'
+      if: matrix.os == 'windows-2019'
       uses: actions/setup-python@v2
       with:
         python-version: 3.8
     - name: Set up Python 3.9
-      if: matrix.os != 'windows-2016'
+      if: matrix.os != 'windows-2019'
       uses: actions/setup-python@v2
       with:
         python-version: 3.9
