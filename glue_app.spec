@@ -23,6 +23,7 @@ a = Analysis(
         "glue_vispy_viewers",
         "vispy",
         "notebook",
+        "freetype",
         "glue_wwt",
         "glue_plotly",
         "glue_statistics",
