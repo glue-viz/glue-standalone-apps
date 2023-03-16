@@ -4,6 +4,7 @@ glue-core
 glue-vispy-viewers
 glue-wwt
 glue-plotly
+pvextractor
 pywwt
 notebook
 numpy<1.22
