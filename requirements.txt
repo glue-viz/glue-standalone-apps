@@ -6,7 +6,5 @@ glue-plotly
 pvextractor
 pywwt
 notebook
-numpy<1.22
-astropy<5.0
 PyQt6==6.4.2
 PyQt6-WebEngine==6.4.0

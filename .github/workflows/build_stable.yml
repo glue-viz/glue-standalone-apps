@@ -17,7 +17,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # os: [macos-11, ubuntu-18.04, windows-2019]
         os: [macos-11, windows-2019]
     steps:
 
@@ -47,18 +46,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    # Not all dependencies work correctly on Python 3.9 on Windows yet so we use
-    # Python 3.8 there.
-    - name: Set up Python 3.8
-      if: matrix.os == 'windows-2019'
+    - name: Set up Python 3.11
       uses: actions/setup-python@v2
       with:
-        python-version: 3.8
-    - name: Set up Python 3.9
-      if: matrix.os != 'windows-2019'
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
+        python-version: 3.11
 
     - name: Install development version of pyinstaller
       if: ${{ matrix.os == 'macos-11' }}
