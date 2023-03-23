@@ -1,13 +1,13 @@
 git+https://github.com/pyinstaller/pyinstaller
 ipykernel<6  # Install old version of ipykernel to avoid terminal issues
-glue-core==1.7.0
+glue-core==1.8.0
 glue-vispy-viewers==1.0.7
 glue-wwt==0.6.1
 glue-plotly==0.4.0
-pvextractor
-pywwt
+pvextractor==0.3
+pywwt==0.19.0
 notebook
 numpy<1.22
 astropy<5.0
-PyQt5==5.14.2
-PyQtWebEngine==5.14.0
+PyQt6==6.4.2
+PyQt6-WebEngine==6.4.0
