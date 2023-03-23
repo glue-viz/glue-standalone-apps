@@ -73,6 +73,7 @@ else:
         console=False,
         icon=icon,
         argv_emulation=True,
+        target_arch='universal2'
     )
 
     coll = COLLECT(

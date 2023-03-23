@@ -30,7 +30,7 @@ jobs:
     - name: Install Python dependencies
       run: pip install -r requirements.txt
     - name: Run pyinstaller
-      run: pyinstaller --target-arch=universal2 glue_app.spec
+      run: pyinstaller glue_app.spec
     - name: Uninstall lxml
       run: pip uninstall -y lxml
     - name: Prepare application for distribution
