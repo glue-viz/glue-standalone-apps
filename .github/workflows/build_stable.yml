@@ -27,10 +27,12 @@ jobs:
 
     - name: Install Python dependencies
       run: pip install -r requirements.txt
+    - name: Uninstall debugpy
+      run: pip uninstall -y debugpy
     - name: Run pyinstaller
       run: pyinstaller glue_app.spec
-    - name: Uninstall lxml and debugpy
-      run: pip uninstall -y lxml debugpy
+    - name: Uninstall lxml
+      run: pip uninstall -y lxml
     - name: Prepare application for distribution
       shell: bash
       run: ./prepare_"$RUNNER_OS".sh ${GITHUB_REF##*/}
