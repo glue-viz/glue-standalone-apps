@@ -11,11 +11,12 @@ qt.APP_LIVELINESS_DEADLINE = 60
 
 os.environ['QTWEBENGINE_CHROMIUM_FLAGS'] = '--ignore-gpu-blacklist'
 
-logger.setLevel("INFO")
-
-load_plugins()
-
 if __name__ == "__main__":
+
+    if '--debug' in sys.argv or '--test' in sys.argv:
+        logger.setLevel("INFO")
+
+    load_plugins()
 
     if '--debug' in sys.argv:
         import faulthandler
