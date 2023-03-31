@@ -38,6 +38,7 @@ a = Analysis(
         "glue_plotly",
         "glue_statistics",
         "pvextractor",
+        "PyQt6.QtTest"
     ],
     hookspath=["hooks"],
     hooksconfig={
