@@ -27,6 +27,7 @@ a = Analysis(
         "glue_wwt",
         "glue_plotly",
         "glue_statistics",
+        "PyQt6.QtTest"
     ],
     hookspath=["hooks"],
     hooksconfig={
