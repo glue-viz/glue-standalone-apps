@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -xe
 
 mv dist/glue.app dist/"glue $1.app"
 rm -rf dist/start_glue
