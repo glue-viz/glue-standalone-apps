@@ -41,9 +41,18 @@ jobs:
       run: pyinstaller glue_app.spec
     - name: Uninstall lxml
       run: pip uninstall -y lxml
-    - name: Prepare application for distribution
-      shell: bash
-      run: ./prepare_"$RUNNER_OS".sh ${GITHUB_REF##*/}
+    - name: Rename MacOS X application
+      run: mv dist/glue.app dist/"glue ${GITHUB_REF##*/}.app"
+    - name: Codesign MacOS X application
+      run: codesign --entitlements entitlements.plist --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v dist/"glue ${GITHUB_REF##*/}.app" --deep --strict --options=runtime --timestamp
+    - name: Make DMG
+      run: hdiutil create -volname "Glue" -srcfolder dist -ov -format UDZO dist/"glue ${GITHUB_REF##*/}.dmg"
+    - name: Remove .app
+      run: rm -rf dist/"glue ${GITHUB_REF##*/}.app"
+    - name: Notarize app
+      run: xcrun notarytool submit dist/"glue ${GITHUB_REF##*/}.dmg" --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --team-id ${{ secrets.TEAM_ID }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --wait
+    - name: Staple notarization to dmg
+      run: xcrun stapler staple dist/"glue ${GITHUB_REF##*/}.dmg"
     - name: Output list of included packages
       if: matrix.os == 'ubuntu-18.04'
       run: pip freeze > included-packages.txt
