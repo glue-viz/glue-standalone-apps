@@ -50,6 +50,8 @@ jobs:
       run: pip uninstall -y lxml
     - name: Rename MacOS X application
       run: mv dist/glue.app dist/"glue ${GITHUB_REF##*/}.app"
+    - name: Remove start_glue
+      run: rm -rf dist/start_glue
     - name: Codesign MacOS X application
       run: codesign --entitlements entitlements.plist --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v dist/"glue ${GITHUB_REF##*/}.app" --deep --strict --options=runtime --timestamp
     - name: Make DMG
