@@ -14,11 +14,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-11]
+        os: [macos-11, ubuntu-18.04, windows-2019]
     steps:
 
     # osx signing based on https://melatonin.dev/blog/how-to-code-sign-and-notarize-macos-audio-plugins-in-ci/
     - name: Import Certificates (macOS)
+      if: ${{ matrix.os == 'macos-11' }}
       uses: apple-actions/import-codesign-certs@v1
       with:
         p12-file-base64: ${{ secrets.DEV_ID_APP_CERT }}
@@ -41,27 +42,47 @@ jobs:
         python-version: 3.9
 
     - name: Install development version of pyinstaller
+      if: ${{ matrix.os == 'macos-11' }}
       run: PYINSTALLER_COMPILE_BOOTLOADER=1 pip install git+https://github.com/rokm/pyinstaller.git@let-there-be-symlinks-final
+
+    - name: Install development version of pyinstaller
+      if: ${{ matrix.os != 'macos-11' }}
+      run: pip install git+https://github.com/pyinstaller/pyinstaller.git
+
     - name: Install Python dependencies
       run: pip install -r requirements.txt
     - name: Run pyinstaller
       run: pyinstaller glue_app.spec
     - name: Uninstall lxml
       run: pip uninstall -y lxml
+
+    - name: Prepare application for distribution
+      if: ${{ matrix.os != 'macos-11' }}
+      shell: bash
+      run: ./prepare_"$RUNNER_OS".sh ${GITHUB_REF##*/}
+
     - name: Rename MacOS X application
+      if: ${{ matrix.os == 'macos-11' }}
       run: mv dist/glue.app dist/"glue ${GITHUB_REF##*/}.app"
     - name: Remove start_glue
+      if: ${{ matrix.os == 'macos-11' }}
       run: rm -rf dist/start_glue
     - name: Codesign MacOS X application
+      if: ${{ matrix.os == 'macos-11' }}
       run: codesign --entitlements entitlements.plist --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v dist/"glue ${GITHUB_REF##*/}.app" --deep --strict --options=runtime --timestamp
     - name: Make DMG
+      if: ${{ matrix.os == 'macos-11' }}
       run: hdiutil create -volname "Glue" -srcfolder dist -ov -format UDZO dist/"glue ${GITHUB_REF##*/}.dmg"
     - name: Remove .app
+      if: ${{ matrix.os == 'macos-11' }}
       run: rm -rf dist/"glue ${GITHUB_REF##*/}.app"
     - name: Notarize app
+      if: ${{ matrix.os == 'macos-11' }}
       run: xcrun notarytool submit dist/"glue ${GITHUB_REF##*/}.dmg" --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --team-id ${{ secrets.TEAM_ID }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --wait
     - name: Staple notarization to dmg
+      if: ${{ matrix.os == 'macos-11' }}
       run: xcrun stapler staple dist/"glue ${GITHUB_REF##*/}.dmg"
+
     - name: Output list of included packages
       if: matrix.os == 'ubuntu-18.04'
       run: pip freeze > included-packages.txt
