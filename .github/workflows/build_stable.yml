@@ -34,7 +34,7 @@ jobs:
         python-version: 3.9
 
     - name: Install development version of pyinstaller
-      run: PYINSTALLER_COMPILE_BOOTLOADER=1 pip install https://github.com/rokm/pyinstaller.git@let-there-be-symlinks-final
+      run: PYINSTALLER_COMPILE_BOOTLOADER=1 pip install git+https://github.com/rokm/pyinstaller.git@let-there-be-symlinks-final
     - name: Install Python dependencies
       run: pip install -r requirements.txt
     - name: Run pyinstaller
