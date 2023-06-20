@@ -19,12 +19,20 @@ jobs:
     steps:
 
     # osx signing based on https://melatonin.dev/blog/how-to-code-sign-and-notarize-macos-audio-plugins-in-ci/
-    - name: Import Certificates (macOS)
+
+    - name: Import Developer ID Application Certificate
       if: ${{ matrix.os == 'macos-11' }}
       uses: apple-actions/import-codesign-certs@v1
       with:
         p12-file-base64: ${{ secrets.DEV_ID_APP_CERT }}
         p12-password: ${{ secrets.DEV_ID_APP_PASSWORD }}
+
+    - name: Import Mac Installer Distribution Certificate
+      if: ${{ matrix.os == 'macos-11' }}
+      uses: apple-actions/import-codesign-certs@v1
+      with:
+        p12-file-base64: ${{ secrets.MAC_INST_DIST_CERT }}
+        p12-password: ${{ secrets.MAC_INST_DIST_PASSWORD }}
 
     - name: Checkout code
       uses: actions/checkout@v2
@@ -74,15 +82,26 @@ jobs:
     - name: Make DMG
       if: ${{ matrix.os == 'macos-11' }}
       run: hdiutil create -volname "Glue" -srcfolder dist -ov -format UDZO dist/"glue ${GITHUB_REF##*/}.dmg"
-    - name: Remove .app
-      if: ${{ matrix.os == 'macos-11' }}
-      run: rm -rf dist/"glue ${GITHUB_REF##*/}.app"
     - name: Notarize app
       if: ${{ matrix.os == 'macos-11' }}
       run: xcrun notarytool submit dist/"glue ${GITHUB_REF##*/}.dmg" --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --team-id ${{ secrets.TEAM_ID }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --wait
     - name: Staple notarization to dmg
       if: ${{ matrix.os == 'macos-11' }}
       run: xcrun stapler staple dist/"glue ${GITHUB_REF##*/}.dmg"
+
+    - name: Build MacOS X installer for distribution
+      if: ${{ matrix.os == 'macos-11' }}
+      run: productbuild --component dist/"glue ${GITHUB_REF##*/}.app" dist/"glue ${GITHUB_REF##*/}_unsigned.pkg"
+    - name: Sign MacOS X installer for distribution
+      if: ${{ matrix.os == 'macos-11' }}
+      run: productsign --sign "${{ secrets.MAC_INSTALLER_DISTRIBUTION}}" dist/"glue ${GITHUB_REF##*/}_unsigned.pkg" dist/"glue ${GITHUB_REF##*/}.pkg"
+    - name: Remove unsigned pkg
+      if: ${{ matrix.os == 'macos-11' }}
+      run: rm -rf dist/"glue ${GITHUB_REF##*/}_unsigned.pkg"
+
+    - name: Remove .app
+      if: ${{ matrix.os == 'macos-11' }}
+      run: rm -rf dist/"glue ${GITHUB_REF##*/}.app"
 
     - name: Output list of included packages
       if: matrix.os == 'ubuntu-18.04'
