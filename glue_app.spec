@@ -3,7 +3,15 @@
 import os
 import sys
 
-VERSION = os.path.basename(os.environ.get('GITHUB_REF', '1.0'))
+# Version needs to be three integers separated by period, which is
+# the case for stable tags, but otherwise we need to use a dummy version
+
+glue_version = os.environ.get('GLUE_VERSION', '')
+
+if glue_version.count('.') == 2:
+    VERSION = glue_version
+else:
+    VERSION = '1.0.0'
 
 if os.name == "nt":
     icon = os.path.abspath("icon.ico")
