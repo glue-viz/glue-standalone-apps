@@ -89,6 +89,7 @@ else:
             "CFBundleVersion": "1.2",
             "CFBundleShortVersionString": "1.2",
             "NSHighResolutionCapable": "True",
+            "LSApplicationCategoryType": "public.app-category.education",
             "CFBundleDocumentTypes": [
                 {
                     "CFBundleTypeName": "Glue Session Files",
