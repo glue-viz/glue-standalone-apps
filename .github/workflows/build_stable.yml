@@ -122,8 +122,7 @@ jobs:
     - name: Upload glue to S3
       shell: bash
       if: github.event_name != 'pull_request'
-      run: aws s3 cp glue* s3://glueviz/installers/${GITHUB_REF##*/}/
-      working-directory: dist
+      run: aws s3 cp dist/ s3://glueviz/installers/${GITHUB_REF##*/}/ --recursive
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
