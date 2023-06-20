@@ -3,7 +3,7 @@
 import os
 import sys
 
-VERSION = os.environ.get('GITHUB_REF', '1.0')
+VERSION = os.path.basename(os.environ.get('GITHUB_REF', '1.0'))
 
 if os.name == "nt":
     icon = os.path.abspath("icon.ico")
