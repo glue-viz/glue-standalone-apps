@@ -3,6 +3,8 @@
 import os
 import sys
 
+VERSION = os.environ.get('GITHUB_REF', '1.0')
+
 if os.name == "nt":
     icon = os.path.abspath("icon.ico")
     onefile = True
@@ -86,8 +88,8 @@ else:
         info_plist={
             "CFBundleName": "glueviz",
             "CFBundleDisplayName": "glueviz",
-            "CFBundleVersion": "1.2",
-            "CFBundleShortVersionString": "1.2",
+            "CFBundleVersion": VERSION,
+            "CFBundleShortVersionString": VERSION,
             "NSHighResolutionCapable": "True",
             "LSApplicationCategoryType": "public.app-category.education",
             "CFBundleDocumentTypes": [
