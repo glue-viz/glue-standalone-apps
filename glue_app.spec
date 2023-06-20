@@ -6,7 +6,7 @@ import sys
 # Version needs to be three integers separated by period, which is
 # the case for stable tags, but otherwise we need to use a dummy version
 
-glue_version = os.environ.get('GLUE_VERSION', '')
+glue_version = os.environ.get('GITHUB_REF_NAME', '')
 
 if glue_version.count('.') == 2:
     VERSION = glue_version
