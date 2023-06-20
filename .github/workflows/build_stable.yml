@@ -109,7 +109,7 @@ jobs:
 
     - name: Build MacOS X installer for distribution
       if: ${{ matrix.os == 'macos-11' }}
-      run: productbuild --component dist/"glue $GLUE_VERSION.app" /Applications/glue.app dist/"glue $GLUE_VERSION_unsigned.pkg"
+      run: productbuild --component dist/"glue $GLUE_VERSION.app" /Applications/glueviz.app dist/"glue $GLUE_VERSION_unsigned.pkg"
     - name: Sign MacOS X installer for distribution
       if: ${{ matrix.os == 'macos-11' }}
       run: productsign --sign "${{ secrets.MAC_INSTALLER_DISTRIBUTION}}" dist/"glue $GLUE_VERSION_unsigned.pkg" dist/"glue $GLUE_VERSION.pkg"
