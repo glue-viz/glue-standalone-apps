@@ -18,13 +18,28 @@ jobs:
         os: [macos-11, windows-2019]
     steps:
 
+    - name: Check glue version to build
+      shell: bash
+      run: echo ${GITHUB_REF_NAME}
+
     # osx signing based on https://melatonin.dev/blog/how-to-code-sign-and-notarize-macos-audio-plugins-in-ci/
-    - name: Import Certificates (macOS)
+
+    - name: Import Developer ID Application Certificate
       if: ${{ matrix.os == 'macos-11' }}
       uses: apple-actions/import-codesign-certs@v1
       with:
         p12-file-base64: ${{ secrets.DEV_ID_APP_CERT }}
         p12-password: ${{ secrets.DEV_ID_APP_PASSWORD }}
+        keychain-password: ${{ secrets.KEYCHAIN_PASSWORD }}
+
+    - name: Import Mac Installer Distribution Certificate
+      if: ${{ matrix.os == 'macos-11' }}
+      uses: apple-actions/import-codesign-certs@v1
+      with:
+        p12-file-base64: ${{ secrets.MAC_INST_DIST_CERT }}
+        p12-password: ${{ secrets.MAC_INST_DIST_PASSWORD }}
+        create-keychain: false
+        keychain-password: ${{ secrets.KEYCHAIN_PASSWORD }}
 
     - name: Checkout code
       uses: actions/checkout@v2
@@ -60,29 +75,51 @@ jobs:
     - name: Prepare application for distribution
       if: ${{ matrix.os != 'macos-11' }}
       shell: bash
-      run: ./prepare_"$RUNNER_OS".sh ${GITHUB_REF##*/}
+      run: ./prepare_"$RUNNER_OS".sh ${GITHUB_REF_NAME}
 
+    - name: Remove nested app
+      if: ${{ matrix.os == 'macos-11' }}
+      run: rm -rf dist/glue.app/Contents/Frameworks/PyQt5/Qt/lib/QtWebEngineCore.framework/Versions/5/Helpers/QtWebEngineProcess.app
     - name: Rename MacOS X application
       if: ${{ matrix.os == 'macos-11' }}
-      run: mv dist/glue.app dist/"glue ${GITHUB_REF##*/}.app"
+      run: mv dist/glue.app dist/"glue ${GITHUB_REF_NAME}.app"
+
+    # Build signed DMG for direct distribution
+
     - name: Remove start_glue
       if: ${{ matrix.os == 'macos-11' }}
       run: rm -rf dist/start_glue
     - name: Codesign MacOS X application
       if: ${{ matrix.os == 'macos-11' }}
-      run: codesign --entitlements entitlements.plist --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v dist/"glue ${GITHUB_REF##*/}.app" --deep --strict --options=runtime --timestamp
+      run: codesign --entitlements entitlements.plist --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v dist/"glue ${GITHUB_REF_NAME}.app" --deep --strict --options=runtime --timestamp
     - name: Make DMG
       if: ${{ matrix.os == 'macos-11' }}
-      run: hdiutil create -volname "Glue" -srcfolder dist -ov -format UDZO dist/"glue ${GITHUB_REF##*/}.dmg"
-    - name: Remove .app
-      if: ${{ matrix.os == 'macos-11' }}
-      run: rm -rf dist/"glue ${GITHUB_REF##*/}.app"
+      run: hdiutil create -volname "Glue" -srcfolder dist -ov -format UDZO dist/"glue ${GITHUB_REF_NAME}.dmg"
     - name: Notarize app
       if: ${{ matrix.os == 'macos-11' }}
-      run: xcrun notarytool submit dist/"glue ${GITHUB_REF##*/}.dmg" --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --team-id ${{ secrets.TEAM_ID }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --wait
+      run: xcrun notarytool submit dist/"glue ${GITHUB_REF_NAME}.dmg" --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --team-id ${{ secrets.TEAM_ID }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --wait
     - name: Staple notarization to dmg
       if: ${{ matrix.os == 'macos-11' }}
-      run: xcrun stapler staple dist/"glue ${GITHUB_REF##*/}.dmg"
+      run: xcrun stapler staple dist/"glue ${GITHUB_REF_NAME}.dmg"
+
+    # Build signed pkg for potential Mac App Store distribution
+
+    - name: Build MacOS X installer for distribution
+      if: ${{ matrix.os == 'macos-11' }}
+      run: productbuild --component dist/"glue ${GITHUB_REF_NAME}.app" /Applications/glueviz.app dist/"glue ${GITHUB_REF_NAME}_unsigned.pkg"
+    - name: Sign MacOS X installer for distribution
+      if: ${{ matrix.os == 'macos-11' }}
+      run: productsign --sign "${{ secrets.MAC_INSTALLER_DISTRIBUTION}}" dist/"glue ${GITHUB_REF_NAME}_unsigned.pkg" dist/"glue ${GITHUB_REF_NAME}.pkg"
+    - name: Remove unsigned pkg
+      if: ${{ matrix.os == 'macos-11' }}
+      run: rm -rf dist/"glue ${GITHUB_REF_NAME}_unsigned.pkg"
+    - name: Validate pkg
+      if: ${{ matrix.os == 'macos-11' }}
+      run: xcrun altool --validate-app -f dist/"glue ${GITHUB_REF_NAME}.pkg" --type osx --username ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }}
+
+    - name: Remove .app
+      if: ${{ matrix.os == 'macos-11' }}
+      run: rm -rf dist/"glue ${GITHUB_REF_NAME}.app"
 
     - name: Output list of included packages
       if: matrix.os == 'ubuntu-18.04'
@@ -92,14 +129,13 @@ jobs:
     - name: Upload glue to S3
       shell: bash
       if: github.event_name != 'pull_request'
-      run: aws s3 cp glue* s3://glueviz/installers/${GITHUB_REF##*/}/
-      working-directory: dist
+      run: aws s3 cp dist/ s3://glueviz/installers/${GITHUB_REF_NAME}/ --recursive
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     - name: Upload package list to S3
       if: github.event_name != 'pull_request' && matrix.os == 'ubuntu-18.04'
-      run: aws s3 cp included-packages.txt s3://glueviz/installers/${GITHUB_REF##*/}/
+      run: aws s3 cp included-packages.txt s3://glueviz/installers/${GITHUB_REF_NAME}/
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
