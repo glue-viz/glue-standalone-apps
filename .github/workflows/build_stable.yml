@@ -26,6 +26,7 @@ jobs:
       with:
         p12-file-base64: ${{ secrets.DEV_ID_APP_CERT }}
         p12-password: ${{ secrets.DEV_ID_APP_PASSWORD }}
+        keychain: signing1
 
     - name: Import Mac Installer Distribution Certificate
       if: ${{ matrix.os == 'macos-11' }}
@@ -33,6 +34,7 @@ jobs:
       with:
         p12-file-base64: ${{ secrets.MAC_INST_DIST_CERT }}
         p12-password: ${{ secrets.MAC_INST_DIST_PASSWORD }}
+        keychain: signing2
 
     - name: Checkout code
       uses: actions/checkout@v2
@@ -73,6 +75,9 @@ jobs:
     - name: Rename MacOS X application
       if: ${{ matrix.os == 'macos-11' }}
       run: mv dist/glue.app dist/"glue ${GITHUB_REF##*/}.app"
+
+    # Build signed DMG for direct distribution
+
     - name: Remove start_glue
       if: ${{ matrix.os == 'macos-11' }}
       run: rm -rf dist/start_glue
@@ -88,6 +93,8 @@ jobs:
     - name: Staple notarization to dmg
       if: ${{ matrix.os == 'macos-11' }}
       run: xcrun stapler staple dist/"glue ${GITHUB_REF##*/}.dmg"
+
+    # Build signed pkg for potential Mac App Store distribution
 
     - name: Build MacOS X installer for distribution
       if: ${{ matrix.os == 'macos-11' }}
