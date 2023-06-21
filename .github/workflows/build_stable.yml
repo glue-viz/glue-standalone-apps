@@ -77,9 +77,11 @@ jobs:
       shell: bash
       run: ./prepare_"$RUNNER_OS".sh ${GITHUB_REF_NAME}
 
-    - name: Remove nested app
-      if: ${{ matrix.os == 'macos-11' }}
-      run: rm -rf dist/glue.app/Contents/Frameworks/PyQt5/Qt/lib/QtWebEngineCore.framework/Versions/5/Helpers/QtWebEngineProcess.app
+    # Don't do the following for now since it actually breaks the WWT plugin
+    # - name: Remove nested app
+    #   if: ${{ matrix.os == 'macos-11' }}
+    #   run: rm -rf dist/glue.app/Contents/Frameworks/PyQt5/Qt/lib/QtWebEngineCore.framework/Versions/5/Helpers/QtWebEngineProcess.app
+
     - name: Rename MacOS X application
       if: ${{ matrix.os == 'macos-11' }}
       run: mv dist/glue.app dist/"glue ${GITHUB_REF_NAME}.app"
