@@ -9,7 +9,7 @@ from glue.app.qt import GlueApplication
 
 qt.APP_LIVELINESS_DEADLINE = 60
 
-os.environ['QTWEBENGINE_CHROMIUM_FLAGS'] = '--ignore-gpu-blacklist'
+os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--ignore-gpu-blacklist"
 
 logger.setLevel("INFO")
 
@@ -17,12 +17,13 @@ load_plugins()
 
 if __name__ == "__main__":
 
-    if '--debug' in sys.argv:
+    if "--debug" in sys.argv:
         import faulthandler
+
         faulthandler.enable()
 
     for arg in sys.argv:
-        if arg.endswith('.glu'):
+        if arg.endswith(".glu"):
             session = arg
             break
     else:
@@ -37,19 +38,22 @@ if __name__ == "__main__":
 
         ga = GlueApplication()
 
-        if '--test' in sys.argv:
+        if "--test" in sys.argv:
 
             ga.start(block=False)
 
             # Open a few viewers to test
 
             from glue.viewers.image.qt import ImageViewer
+
             ga.new_data_viewer(ImageViewer)
 
             from glue_wwt.viewer.qt_data_viewer import WWTQtViewer
+
             ga.new_data_viewer(WWTQtViewer)
 
             from glue_vispy_viewers.scatter.scatter_viewer import VispyScatterViewer
+
             ga.new_data_viewer(VispyScatterViewer)
 
             start = time.time()
