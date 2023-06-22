@@ -130,7 +130,7 @@ jobs:
       run: rm -rf dist/"glueviz.app"
 
     - name: Output list of included packages
-      if: matrix.os == 'ubuntu-18.04'
+      if: matrix.os == 'macos-11'
       run: pip freeze > included-packages.txt
     - name: Install awscli
       run: pip install awscli
@@ -142,7 +142,7 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     - name: Upload package list to S3
-      if: github.event_name != 'pull_request' && matrix.os == 'ubuntu-18.04'
+      if: github.event_name != 'pull_request' && matrix.os == 'macos-11'
       run: aws s3 cp included-packages.txt s3://glueviz/installers/${GITHUB_REF_NAME}/
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
