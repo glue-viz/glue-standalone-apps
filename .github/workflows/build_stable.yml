@@ -69,16 +69,10 @@ jobs:
       run: pip install git+https://github.com/pyinstaller/pyinstaller.git
 
     - name: Install Python dependencies
-      run: pip install -r requirements.txt
+      run: pip install -r requirements.txt --no-cache-dir
+
     - name: Run pyinstaller
       run: pyinstaller glue_app.spec
-    - name: Uninstall lxml
-      run: pip uninstall -y lxml
-
-    - name: Prepare application for distribution
-      if: ${{ matrix.os != 'macos-11' }}
-      shell: bash
-      run: ./prepare_"$RUNNER_OS".sh ${GITHUB_REF_NAME}
 
     # Don't do the following for now since it actually breaks the WWT plugin
     # - name: Remove nested app
