@@ -1,4 +1,4 @@
-name: Build stable bundles
+name: Build stable and nightly bundles
 
 on:
   push:
@@ -6,6 +6,9 @@ on:
     - '*'
     tags:
     - '*'
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
 
 jobs:
   build_applications:
@@ -85,6 +88,10 @@ jobs:
     - name: Rename MacOS X application
       if: ${{ matrix.os == 'macos-11' }}
       run: mv dist/glue.app dist/"glue ${GITHUB_REF_NAME}.app"
+
+    - name: Rename Windows application
+      if: ${{ matrix.os == 'windows-2019' }}
+      run: mv dist/glue.exe dist/"glue ${GITHUB_REF_NAME}.exe"
 
     # Build signed DMG for direct distribution
 
