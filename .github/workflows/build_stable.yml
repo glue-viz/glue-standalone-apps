@@ -89,6 +89,7 @@ jobs:
 
     - name: Rename Windows application
       if: ${{ matrix.os == 'windows-2019' }}
+      shell: bash
       run: mv dist/glue.exe dist/"glue ${GITHUB_REF_NAME}.exe"
 
     # Build signed DMG for direct distribution
