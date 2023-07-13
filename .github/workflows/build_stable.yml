@@ -62,7 +62,7 @@ jobs:
 
     - name: Install development version of pyinstaller
       if: ${{ matrix.os == 'macos-11' }}
-      run: PYINSTALLER_COMPILE_BOOTLOADER=1 pip install git+https://github.com/rokm/pyinstaller.git@let-there-be-symlinks-final
+      run: PYINSTALLER_COMPILE_BOOTLOADER=1 pip install git+https://github.com/pyinstaller/pyinstaller.git
 
     - name: Install development version of pyinstaller
       if: ${{ matrix.os != 'macos-11' }}
