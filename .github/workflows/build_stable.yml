@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-11, windows-2019]
+        os: [macos-14, windows-2019]
     steps:
 
     - name: Check glue version to build
