@@ -1,5 +1,6 @@
 pyinstaller
 glue-core
+glue-qt
 glue-vispy-viewers
 glue-wwt
 glue-plotly

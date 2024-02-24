@@ -34,6 +34,7 @@ a = Analysis(
         "vispy",
         "notebook",
         "freetype",
+        "glue_qt",
         "glue_wwt",
         "glue_plotly",
         "glue_statistics",
