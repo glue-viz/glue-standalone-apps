@@ -28,7 +28,7 @@ jobs:
     # osx signing based on https://melatonin.dev/blog/how-to-code-sign-and-notarize-macos-audio-plugins-in-ci/
 
     - name: Import Developer ID Application Certificate
-      if: ${{ matrix.os == 'macos-11' }}
+      if: ${{ matrix.os == 'macos-14' }}
       uses: apple-actions/import-codesign-certs@v1
       with:
         p12-file-base64: ${{ secrets.DEV_ID_APP_CERT }}
@@ -36,7 +36,7 @@ jobs:
         keychain-password: ${{ secrets.KEYCHAIN_PASSWORD }}
 
     - name: Import Mac Installer Distribution Certificate
-      if: ${{ matrix.os == 'macos-11' }}
+      if: ${{ matrix.os == 'macos-14' }}
       uses: apple-actions/import-codesign-certs@v1
       with:
         p12-file-base64: ${{ secrets.MAC_INST_DIST_CERT }}
@@ -53,11 +53,11 @@ jobs:
         python-version: 3.11
 
     # - name: Install development version of pyinstaller
-    #   if: ${{ matrix.os == 'macos-11' }}
+    #   if: ${{ matrix.os == 'macos-14' }}
     #   run: PYINSTALLER_COMPILE_BOOTLOADER=1 pip install git+https://github.com/pyinstaller/pyinstaller.git
 
     # - name: Install development version of pyinstaller
-    #   if: ${{ matrix.os != 'macos-11' }}
+    #   if: ${{ matrix.os != 'macos-14' }}
     #   run: pip install git+https://github.com/pyinstaller/pyinstaller.git
 
     - name: Install Python dependencies
@@ -68,15 +68,15 @@ jobs:
 
     # Don't do the following for now since it actually breaks the WWT plugin
     # - name: Remove nested app
-    #   if: ${{ matrix.os == 'macos-11' }}
+    #   if: ${{ matrix.os == 'macos-14' }}
     #   run: rm -rf dist/glue.app/Contents/Frameworks/PyQt5/Qt/lib/QtWebEngineCore.framework/Versions/5/Helpers/QtWebEngineProcess.app
 
     - name: Simple test of MacOS X application
-      if: ${{ matrix.os == 'macos-11' }}
+      if: ${{ matrix.os == 'macos-14' }}
       run: dist/glue.app/Contents/MacOS/start_glue --test
 
     - name: Rename MacOS X application
-      if: ${{ matrix.os == 'macos-11' }}
+      if: ${{ matrix.os == 'macos-14' }}
       run: mv dist/glue.app dist/"glue ${GITHUB_REF_NAME}.app"
 
     - name: Rename Windows application
@@ -87,48 +87,48 @@ jobs:
     # Build signed DMG for direct distribution
 
     - name: Remove start_glue
-      if: ${{ matrix.os == 'macos-11' }}
+      if: ${{ matrix.os == 'macos-14' }}
       run: rm -rf dist/start_glue
     - name: Codesign MacOS X application
-      if: ${{ matrix.os == 'macos-11' }}
+      if: ${{ matrix.os == 'macos-14' }}
       run: codesign --entitlements entitlements.plist --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v dist/"glue ${GITHUB_REF_NAME}.app" --deep --strict --options=runtime --timestamp
     - name: Make DMG
-      if: ${{ matrix.os == 'macos-11' }}
+      if: ${{ matrix.os == 'macos-14' }}
       run: hdiutil create -volname "Glue" -srcfolder dist -ov -format UDZO dist/"glue ${GITHUB_REF_NAME}.dmg"
     - name: Notarize app
-      if: ${{ matrix.os == 'macos-11' }}
+      if: ${{ matrix.os == 'macos-14' }}
       run: xcrun notarytool submit dist/"glue ${GITHUB_REF_NAME}.dmg" --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --team-id ${{ secrets.TEAM_ID }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --wait
     - name: Staple notarization to dmg
-      if: ${{ matrix.os == 'macos-11' }}
+      if: ${{ matrix.os == 'macos-14' }}
       run: xcrun stapler staple dist/"glue ${GITHUB_REF_NAME}.dmg"
 
     # Build signed pkg for potential Mac App Store distribution
 
     - name: Rename MacOS X application
-      if: ${{ matrix.os == 'macos-11' }}
+      if: ${{ matrix.os == 'macos-14' }}
       run: mv dist/"glue ${GITHUB_REF_NAME}.app" dist/glueviz.app
     - name: Build MacOS X installer for distribution
-      if: ${{ matrix.os == 'macos-11' }}
+      if: ${{ matrix.os == 'macos-14' }}
       run: productbuild --component dist/glueviz.app /Applications/ dist/"glue ${GITHUB_REF_NAME}_unsigned.pkg"
     - name: Sign MacOS X installer for distribution
-      if: ${{ matrix.os == 'macos-11' }}
+      if: ${{ matrix.os == 'macos-14' }}
       run: productsign --sign "${{ secrets.MAC_INSTALLER_DISTRIBUTION}}" dist/"glue ${GITHUB_REF_NAME}_unsigned.pkg" dist/"glue ${GITHUB_REF_NAME}.pkg"
     - name: Remove unsigned pkg
-      if: ${{ matrix.os == 'macos-11' }}
+      if: ${{ matrix.os == 'macos-14' }}
       run: rm -rf dist/"glue ${GITHUB_REF_NAME}_unsigned.pkg"
 
     # For now validation fails because the entitlements file is missing the sandbox option - but we are leaving
     # it out for now as WWT does not work correctly with it.
     #- name: Validate pkg
-    #  if: ${{ matrix.os == 'macos-11' }}
+    #  if: ${{ matrix.os == 'macos-14' }}
     #  run: xcrun altool --validate-app -f dist/"glue ${GITHUB_REF_NAME}.pkg" --type osx --username ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }}
 
     - name: Remove .app
-      if: ${{ matrix.os == 'macos-11' }}
+      if: ${{ matrix.os == 'macos-14' }}
       run: rm -rf dist/"glueviz.app"
 
     - name: Output list of included packages
-      if: matrix.os == 'macos-11'
+      if: matrix.os == 'macos-14'
       run: pip freeze > included-packages.txt
     - name: Install awscli
       run: pip install awscli
