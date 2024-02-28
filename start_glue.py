@@ -1,5 +1,8 @@
 import os
 import sys
+
+print("start_glue.py called with arguments", sys.argv)
+
 import time
 
 from pywwt import qt
@@ -16,7 +19,6 @@ logger.setLevel("INFO")
 load_plugins()
 
 if __name__ == "__main__":
-
     if "--debug" in sys.argv:
         import faulthandler
 
@@ -30,16 +32,13 @@ if __name__ == "__main__":
         session = None
 
     if session:
-
         ga = GlueApplication.restore_session(session)
         ga.app.exec_()
 
     else:
-
         ga = GlueApplication()
 
         if "--test" in sys.argv:
-
             ga.start(block=False)
 
             # Open a few viewers to test
