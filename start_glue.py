@@ -16,6 +16,12 @@ os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--ignore-gpu-blacklist"
 
 if __name__ == "__main__":
 
+    if os.path.exists('/tmp/gluelock'):
+        raise Exception("glue lock already exists")
+
+    with open('/tmp/gluelock', 'w') as f:
+        f.write('Denied!')
+
     if '--debug' in sys.argv or '--test' in sys.argv:
         logger.setLevel("INFO")
 
