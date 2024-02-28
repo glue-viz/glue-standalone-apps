@@ -8,7 +8,7 @@ import time
 from pywwt import qt
 from glue import load_plugins
 from glue.logger import logger
-from glue.app.qt import GlueApplication
+from glue_qt.app import GlueApplication
 
 qt.APP_LIVELINESS_DEADLINE = 60
 
@@ -45,7 +45,7 @@ if __name__ == "__main__":
 
             # Open a few viewers to test
 
-            from glue.viewers.image.qt import ImageViewer
+            from glue_qt.viewers.image import ImageViewer
 
             ga.new_data_viewer(ImageViewer)
 
