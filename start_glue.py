@@ -1,8 +1,14 @@
-import os
 import sys
 
 print("start_glue.py called with arguments", sys.argv)
 
+# Exit early if this was launched by multiprocessing
+for arg in sys.argv:
+    if 'multiprocessing' in arg:
+        print('Killed forked process')
+        sys.exit(0)
+
+import os
 import time
 
 from pywwt import qt
@@ -18,11 +24,11 @@ if __name__ == "__main__":
 
     print(sys.argv)
 
-    if os.path.exists('/tmp/gluelock'):
-        raise Exception("glue lock already exists")
+    #if os.path.exists('/tmp/gluelock'):
+    #    raise Exception("glue lock already exists")
 
-    with open('/tmp/gluelock', 'w') as f:
-        f.write('Denied!')
+    #with open('/tmp/gluelock', 'w') as f:
+    #    f.write('Denied!')
 
     if '--debug' in sys.argv or '--test' in sys.argv:
         logger.setLevel("INFO")
