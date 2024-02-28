@@ -66,6 +66,9 @@ jobs:
     - name: Uninstall debugpy
       run: pip uninstall -y debugpy
 
+    - name: Uninstall joblib
+      run: pip uninstall -y joblib
+
     - name: Run pyinstaller
       run: pyinstaller glue_app.spec
 
