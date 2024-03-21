@@ -1,25 +1,33 @@
-import os
 import sys
 
 print("start_glue.py called with arguments", sys.argv)
 
+# Exit early if this was launched by multiprocessing
+for arg in sys.argv:
+    if 'multiprocessing' in arg:
+        print('Killed forked process')
+        sys.exit(0)
+
+import os
 import time
 
 from pywwt import qt
 from glue import load_plugins
 from glue.logger import logger
-from glue.app.qt import GlueApplication
+from glue_qt.app import GlueApplication
 
 qt.APP_LIVELINESS_DEADLINE = 60
 
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--ignore-gpu-blacklist"
 
-logger.setLevel("INFO")
-
-load_plugins()
-
 if __name__ == "__main__":
-    if "--debug" in sys.argv:
+
+    if '--debug' in sys.argv or '--test' in sys.argv:
+        logger.setLevel("INFO")
+
+    load_plugins()
+
+    if '--debug' in sys.argv:
         import faulthandler
 
         faulthandler.enable()
@@ -43,7 +51,7 @@ if __name__ == "__main__":
 
             # Open a few viewers to test
 
-            from glue.viewers.image.qt import ImageViewer
+            from glue_qt.viewers.image import ImageViewer
 
             ga.new_data_viewer(ImageViewer)
 

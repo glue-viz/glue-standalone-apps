@@ -1,12 +1,14 @@
-ipykernel<6  # Install old version of ipykernel to avoid terminal issues
+pyinstaller
 glue-core
+glue-qt>=0.3.1
 glue-vispy-viewers
-glue-wwt
+glue-wwt>=0.7.2
 glue-plotly
 pvextractor
 pywwt
 notebook
-numpy<1.22
-astropy<5.0
-PyQt5==5.14.2
-PyQtWebEngine==5.14.0
+PyQt6==6.6.*
+PyQt6-Qt6==6.6.*
+PyQt6-WebEngine==6.6.*
+PyQt6-WebEngine-Qt6==6.6.*
+git+https://github.com/vispy/vispy

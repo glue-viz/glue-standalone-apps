@@ -3,6 +3,8 @@
 import os
 import sys
 
+sys.setrecursionlimit(sys.getrecursionlimit() * 5)
+
 # Version needs to be three integers separated by period, which is
 # the case for stable tags, but otherwise we need to use a dummy version
 
@@ -34,17 +36,23 @@ a = Analysis(
         "vispy",
         "notebook",
         "freetype",
+        "glue_qt",
         "glue_wwt",
         "glue_plotly",
         "glue_statistics",
         "pvextractor",
+        "PyQt6.QtTest",
     ],
     hookspath=["hooks"],
     hooksconfig={
         "matplotlib": {"backends": "all"},
     },
     runtime_hooks=[],
-    excludes=["tkinter", "PyQt5.QtQml"],
+    excludes=[
+        "tkinter",
+        "PyQt5.QtQml",
+        "joblib",
+    ],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher,
@@ -53,7 +61,6 @@ a = Analysis(
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
 if onefile:
-
     exe = EXE(
         pyz,
         a.scripts,
@@ -70,7 +77,6 @@ if onefile:
     )
 
 else:
-
     exe = EXE(
         pyz,
         a.scripts,
