@@ -59,7 +59,7 @@ if __name__ == "__main__":
 
             ga.new_data_viewer(WWTQtViewer)
 
-            from glue_vispy_viewers.scatter.scatter_viewer import VispyScatterViewer
+            from glue_vispy_viewers.scatter.qt.scatter_viewer import VispyScatterViewer
 
             ga.new_data_viewer(VispyScatterViewer)
 
