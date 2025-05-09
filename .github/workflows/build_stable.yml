@@ -39,7 +39,7 @@ jobs:
     # osx signing based on https://melatonin.dev/blog/how-to-code-sign-and-notarize-macos-audio-plugins-in-ci/
 
     - name: Import Developer ID Application Certificate
-      if: ${{ matrix.os == 'macos-14' && github.repository == 'glue-viz/glue-standalone-app' }}
+      if: ${{ matrix.os == 'macos-14' && github.repository == 'glue-viz/glue-standalone-apps' }}
       uses: apple-actions/import-codesign-certs@v1
       with:
         p12-file-base64: ${{ secrets.DEV_ID_APP_CERT }}
@@ -47,7 +47,7 @@ jobs:
         keychain-password: ${{ secrets.KEYCHAIN_PASSWORD }}
 
     - name: Import Mac Installer Distribution Certificate
-      if: ${{ matrix.os == 'macos-14' && github.repository == 'glue-viz/glue-standalone-app' }}
+      if: ${{ matrix.os == 'macos-14' && github.repository == 'glue-viz/glue-standalone-apps' }}
       uses: apple-actions/import-codesign-certs@v1
       with:
         p12-file-base64: ${{ secrets.MAC_INST_DIST_CERT }}
@@ -99,16 +99,16 @@ jobs:
       if: ${{ matrix.os == 'macos-14' }}
       run: rm -rf dist/start_glue
     - name: Codesign MacOS X application
-      if: ${{ matrix.os == 'macos-14' && github.repository == 'glue-viz/glue-standalone-app' }}
+      if: ${{ matrix.os == 'macos-14' && github.repository == 'glue-viz/glue-standalone-apps' }}
       run: codesign --entitlements entitlements.plist --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v dist/"glue ${BRANCH_NAME}.app" --deep --strict --options=runtime --timestamp
     - name: Make DMG
       if: ${{ matrix.os == 'macos-14' }}
       run: hdiutil create -volname "Glue" -srcfolder dist -ov -format UDZO dist/"glue ${BRANCH_NAME}.dmg"
     - name: Notarize app
-      if: ${{ matrix.os == 'macos-14' && github.repository == 'glue-viz/glue-standalone-app' }}
+      if: ${{ matrix.os == 'macos-14' && github.repository == 'glue-viz/glue-standalone-apps' }}
       run: xcrun notarytool submit dist/"glue ${BRANCH_NAME}.dmg" --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --team-id ${{ secrets.TEAM_ID }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --wait
     - name: Staple notarization to dmg
-      if: ${{ matrix.os == 'macos-14' && github.repository == 'glue-viz/glue-standalone-app' }}
+      if: ${{ matrix.os == 'macos-14' && github.repository == 'glue-viz/glue-standalone-apps' }}
       run: xcrun stapler staple dist/"glue ${BRANCH_NAME}.dmg"
 
     # Build signed pkg for potential Mac App Store distribution
@@ -120,7 +120,7 @@ jobs:
       if: ${{ matrix.os == 'macos-14' }}
       run: productbuild --component dist/glueviz.app /Applications/ dist/"glue ${BRANCH_NAME}_unsigned.pkg"
     - name: Sign MacOS X installer for distribution
-      if: ${{ matrix.os == 'macos-14' && github.repository == 'glue-viz/glue-standalone-app' }}
+      if: ${{ matrix.os == 'macos-14' && github.repository == 'glue-viz/glue-standalone-apps' }}
       run: productsign --sign "${{ secrets.MAC_INSTALLER_DISTRIBUTION}}" dist/"glue ${BRANCH_NAME}_unsigned.pkg" dist/"glue ${BRANCH_NAME}.pkg"
     - name: Remove unsigned pkg
       if: ${{ matrix.os == 'macos-14' }}
