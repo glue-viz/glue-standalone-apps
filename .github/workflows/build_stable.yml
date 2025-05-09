@@ -29,6 +29,7 @@ jobs:
         else
           BRANCH_NAME="${GITHUB_REF_NAME}"
         fi
+        echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
 
     - name: Check glue version to build
       shell: bash
