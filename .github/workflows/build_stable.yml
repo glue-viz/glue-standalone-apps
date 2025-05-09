@@ -21,14 +21,25 @@ jobs:
         os: [macos-14, windows-2019]
     steps:
 
+
+    - name: Determine name of build
+      shell: bash
+      run: |
+        if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+          BRANCH_NAME="${{ github.head_ref }}"
+        else
+          BRANCH_NAME="${GITHUB_REF_NAME}"
+        fi
+        echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
     - name: Check glue version to build
       shell: bash
-      run: echo ${GITHUB_REF_NAME}
+      run: echo ${BRANCH_NAME}
 
     # osx signing based on https://melatonin.dev/blog/how-to-code-sign-and-notarize-macos-audio-plugins-in-ci/
 
     - name: Import Developer ID Application Certificate
-      if: ${{ matrix.os == 'macos-14' }}
+      if: ${{ matrix.os == 'macos-14' && github.repository == 'glue-viz/glue-standalone-app' }}
       uses: apple-actions/import-codesign-certs@v1
       with:
         p12-file-base64: ${{ secrets.DEV_ID_APP_CERT }}
@@ -36,7 +47,7 @@ jobs:
         keychain-password: ${{ secrets.KEYCHAIN_PASSWORD }}
 
     - name: Import Mac Installer Distribution Certificate
-      if: ${{ matrix.os == 'macos-14' }}
+      if: ${{ matrix.os == 'macos-14' && github.repository == 'glue-viz/glue-standalone-app' }}
       uses: apple-actions/import-codesign-certs@v1
       with:
         p12-file-base64: ${{ secrets.MAC_INST_DIST_CERT }}
@@ -75,12 +86,12 @@ jobs:
 
     - name: Rename MacOS X application
       if: ${{ matrix.os == 'macos-14' }}
-      run: mv dist/glue.app dist/"glue ${GITHUB_REF_NAME}.app"
+      run: mv dist/glue.app dist/"glue ${BRANCH_NAME}.app"
 
     - name: Rename Windows application
       if: ${{ matrix.os == 'windows-2019' }}
       shell: bash
-      run: mv dist/glue.exe dist/"glue ${GITHUB_REF_NAME}.exe"
+      run: mv dist/glue.exe dist/"glue ${BRANCH_NAME}.exe"
 
     # Build signed DMG for direct distribution
 
@@ -88,38 +99,38 @@ jobs:
       if: ${{ matrix.os == 'macos-14' }}
       run: rm -rf dist/start_glue
     - name: Codesign MacOS X application
-      if: ${{ matrix.os == 'macos-14' }}
-      run: codesign --entitlements entitlements.plist --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v dist/"glue ${GITHUB_REF_NAME}.app" --deep --strict --options=runtime --timestamp
+      if: ${{ matrix.os == 'macos-14' && github.repository == 'glue-viz/glue-standalone-app' }}
+      run: codesign --entitlements entitlements.plist --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v dist/"glue ${BRANCH_NAME}.app" --deep --strict --options=runtime --timestamp
     - name: Make DMG
       if: ${{ matrix.os == 'macos-14' }}
-      run: hdiutil create -volname "Glue" -srcfolder dist -ov -format UDZO dist/"glue ${GITHUB_REF_NAME}.dmg"
+      run: hdiutil create -volname "Glue" -srcfolder dist -ov -format UDZO dist/"glue ${BRANCH_NAME}.dmg"
     - name: Notarize app
-      if: ${{ matrix.os == 'macos-14' }}
-      run: xcrun notarytool submit dist/"glue ${GITHUB_REF_NAME}.dmg" --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --team-id ${{ secrets.TEAM_ID }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --wait
+      if: ${{ matrix.os == 'macos-14' && github.repository == 'glue-viz/glue-standalone-app' }}
+      run: xcrun notarytool submit dist/"glue ${BRANCH_NAME}.dmg" --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --team-id ${{ secrets.TEAM_ID }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --wait
     - name: Staple notarization to dmg
-      if: ${{ matrix.os == 'macos-14' }}
-      run: xcrun stapler staple dist/"glue ${GITHUB_REF_NAME}.dmg"
+      if: ${{ matrix.os == 'macos-14' && github.repository == 'glue-viz/glue-standalone-app' }}
+      run: xcrun stapler staple dist/"glue ${BRANCH_NAME}.dmg"
 
     # Build signed pkg for potential Mac App Store distribution
 
     - name: Rename MacOS X application
       if: ${{ matrix.os == 'macos-14' }}
-      run: mv dist/"glue ${GITHUB_REF_NAME}.app" dist/glueviz.app
+      run: mv dist/"glue ${BRANCH_NAME}.app" dist/glueviz.app
     - name: Build MacOS X installer for distribution
       if: ${{ matrix.os == 'macos-14' }}
-      run: productbuild --component dist/glueviz.app /Applications/ dist/"glue ${GITHUB_REF_NAME}_unsigned.pkg"
+      run: productbuild --component dist/glueviz.app /Applications/ dist/"glue ${BRANCH_NAME}_unsigned.pkg"
     - name: Sign MacOS X installer for distribution
-      if: ${{ matrix.os == 'macos-14' }}
-      run: productsign --sign "${{ secrets.MAC_INSTALLER_DISTRIBUTION}}" dist/"glue ${GITHUB_REF_NAME}_unsigned.pkg" dist/"glue ${GITHUB_REF_NAME}.pkg"
+      if: ${{ matrix.os == 'macos-14' && github.repository == 'glue-viz/glue-standalone-app' }}
+      run: productsign --sign "${{ secrets.MAC_INSTALLER_DISTRIBUTION}}" dist/"glue ${BRANCH_NAME}_unsigned.pkg" dist/"glue ${BRANCH_NAME}.pkg"
     - name: Remove unsigned pkg
       if: ${{ matrix.os == 'macos-14' }}
-      run: rm -rf dist/"glue ${GITHUB_REF_NAME}_unsigned.pkg"
+      run: rm -rf dist/"glue ${BRANCH_NAME}_unsigned.pkg"
 
     # For now validation fails because the entitlements file is missing the sandbox option - but we are leaving
     # it out for now as WWT does not work correctly with it.
     #- name: Validate pkg
     #  if: ${{ matrix.os == 'macos-14' }}
-    #  run: xcrun altool --validate-app -f dist/"glue ${GITHUB_REF_NAME}.pkg" --type osx --username ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }}
+    #  run: xcrun altool --validate-app -f dist/"glue ${BRANCH_NAME}.pkg" --type osx --username ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }}
 
     - name: Remove .app
       if: ${{ matrix.os == 'macos-14' }}
@@ -133,13 +144,13 @@ jobs:
     - name: Upload glue to S3
       shell: bash
       if: github.event_name != 'pull_request'
-      run: aws s3 cp dist/ s3://glueviz/installers/${GITHUB_REF_NAME}/ --recursive
+      run: aws s3 cp dist/ s3://glueviz/installers/${BRANCH_NAME}/ --recursive
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     - name: Upload package list to S3
       if: github.event_name != 'pull_request' && matrix.os == 'macos-14'
-      run: aws s3 cp included-packages.txt s3://glueviz/installers/${GITHUB_REF_NAME}/
+      run: aws s3 cp included-packages.txt s3://glueviz/installers/${BRANCH_NAME}/
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
