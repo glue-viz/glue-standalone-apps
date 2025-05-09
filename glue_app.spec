@@ -40,6 +40,7 @@ a = Analysis(
         "glue_wwt",
         "glue_plotly",
         "glue_statistics",
+        "pyavm",
         "pvextractor",
         "PyQt6.QtTest",
     ],
