@@ -23,6 +23,7 @@ jobs:
 
 
     - name: Determine name of build
+      shell: bash
       run: |
         if [[ "${{ github.event_name }}" == "pull_request" ]]; then
           BRANCH_NAME="${{ github.head_ref }}"
