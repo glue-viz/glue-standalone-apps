@@ -12,4 +12,4 @@ PyQt6==6.6.*
 PyQt6-Qt6==6.6.*
 PyQt6-WebEngine==6.6.*
 PyQt6-WebEngine-Qt6==6.6.*
-git+https://github.com/vispy/vispy
+vispy==0.15.*
