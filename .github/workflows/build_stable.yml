@@ -106,7 +106,7 @@ jobs:
       run: hdiutil create -volname "Glue" -srcfolder dist -ov -format UDZO dist/"glue ${BRANCH_NAME}.dmg"
     - name: Notarize app
       if: ${{ matrix.os == 'macos-14' && github.repository == 'glue-viz/glue-standalone-apps' }}
-      run: xcrun notarytool submit dist/"glue ${BRANCH_NAME}.dmg" --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --team-id ${{ secrets.TEAM_ID }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --wait
+      run: xcrun notarytool submit dist/"glue ${BRANCH_NAME}.dmg" --wait --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --team-id ${{ secrets.TEAM_ID }} --password ${{ secrets.NOTARIZATION_PASSWORD }}
     - name: Staple notarization to dmg
       if: ${{ matrix.os == 'macos-14' && github.repository == 'glue-viz/glue-standalone-apps' }}
       run: xcrun stapler staple dist/"glue ${BRANCH_NAME}.dmg"
