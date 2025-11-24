@@ -112,25 +112,25 @@ jobs:
       run: xcrun stapler staple dist/"glue ${BRANCH_NAME}.dmg"
 
     # Build signed pkg for potential Mac App Store distribution
-
-    - name: Rename MacOS X application
-      if: ${{ matrix.os == 'macos-14' }}
-      run: mv dist/"glue ${BRANCH_NAME}.app" dist/glueviz.app
-    - name: Build MacOS X installer for distribution
-      if: ${{ matrix.os == 'macos-14' }}
-      run: productbuild --component dist/glueviz.app /Applications/ dist/"glue ${BRANCH_NAME}_unsigned.pkg"
-    - name: Sign MacOS X installer for distribution
-      if: ${{ matrix.os == 'macos-14' && github.repository == 'glue-viz/glue-standalone-apps' }}
-      run: productsign --sign "${{ secrets.MAC_INSTALLER_DISTRIBUTION}}" dist/"glue ${BRANCH_NAME}_unsigned.pkg" dist/"glue ${BRANCH_NAME}.pkg"
-    - name: Remove unsigned pkg
-      if: ${{ matrix.os == 'macos-14' }}
-      run: rm -rf dist/"glue ${BRANCH_NAME}_unsigned.pkg"
+    # 
+    # - name: Rename MacOS X application
+    #   if: ${{ matrix.os == 'macos-14' }}
+    #   run: mv dist/"glue ${BRANCH_NAME}.app" dist/glueviz.app
+    # - name: Build MacOS X installer for distribution
+    #   if: ${{ matrix.os == 'macos-14' }}
+    #   run: productbuild --component dist/glueviz.app /Applications/ dist/"glue ${BRANCH_NAME}_unsigned.pkg"
+    # - name: Sign MacOS X installer for distribution
+    #   if: ${{ matrix.os == 'macos-14' && github.repository == 'glue-viz/glue-standalone-apps' }}
+    #   run: productsign --sign "${{ secrets.MAC_INSTALLER_DISTRIBUTION}}" dist/"glue ${BRANCH_NAME}_unsigned.pkg" dist/"glue ${BRANCH_NAME}.pkg"
+    # - name: Remove unsigned pkg
+    #   if: ${{ matrix.os == 'macos-14' }}
+    #   run: rm -rf dist/"glue ${BRANCH_NAME}_unsigned.pkg"
 
     # For now validation fails because the entitlements file is missing the sandbox option - but we are leaving
     # it out for now as WWT does not work correctly with it.
-    #- name: Validate pkg
-    #  if: ${{ matrix.os == 'macos-14' }}
-    #  run: xcrun altool --validate-app -f dist/"glue ${BRANCH_NAME}.pkg" --type osx --username ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }}
+    # - name: Validate pkg
+    #   if: ${{ matrix.os == 'macos-14' }}
+    #   run: xcrun altool --validate-app -f dist/"glue ${BRANCH_NAME}.pkg" --type osx --username ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }}
 
     - name: Remove .app
       if: ${{ matrix.os == 'macos-14' }}
