@@ -134,7 +134,7 @@ jobs:
 
     - name: Remove .app
       if: ${{ matrix.os == 'macos-14' }}
-      run: rm -rf dist/"glueviz.app"
+      run: rm -rf dist/*.app
 
     - name: Output list of included packages
       if: matrix.os == 'macos-14'
