@@ -89,7 +89,7 @@ jobs:
       run: mv dist/glue.app dist/"glue ${BRANCH_NAME}.app"
 
     - name: Rename Windows application
-      if: ${{ matrix.os == 'windows-2019' }}
+      if: ${{ matrix.os == 'windows-2022' }}
       shell: bash
       run: mv dist/glue.exe dist/"glue ${BRANCH_NAME}.exe"
 
