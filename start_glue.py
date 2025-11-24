@@ -55,7 +55,7 @@ if __name__ == "__main__":
 
             ga.new_data_viewer(ImageViewer)
 
-            from glue_wwt.viewer.qt_data_viewer import WWTQtViewer
+            from glue_wwt.viewer.qt.viewer import WWTQtViewer
 
             ga.new_data_viewer(WWTQtViewer)
 
