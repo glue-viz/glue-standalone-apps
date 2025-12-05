@@ -1,4 +1,10 @@
 pyinstaller
+
+# For now pin echo to <0.11 as a change in behavior in that version
+# made it so that glue-vispy-viewers crashes instead of emitting
+# an exception but proceeding
+echo<0.11
+
 glue-core>=1.24.0
 glue-qt>=0.3.1
 glue-vispy-viewers>=1.3.0
