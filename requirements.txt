@@ -21,3 +21,6 @@ PyQt6-Qt6==6.6.*
 PyQt6-WebEngine==6.6.*
 PyQt6-WebEngine-Qt6==6.6.*
 vispy==0.15.*
+
+# Pin matplotlib <3.10.9 so as to avoid an incompatibility with pyinstaller
+matplotlib<3.10.9
