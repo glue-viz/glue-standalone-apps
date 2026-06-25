@@ -41,6 +41,7 @@ a = Analysis(
         "glue_plotly",
         "pyavm",
         "pvextractor",
+        "astrodendro",
         "PyQt6.QtTest",
     ],
     hookspath=["hooks"],
