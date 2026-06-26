@@ -27,6 +27,23 @@ import mimetypes
 mimetypes.knownfiles = []
 mimetypes.init()
 
+# webbrowser.open() launches the default browser by spawning /usr/bin/open,
+# which the App Store sandbox blocks (it may not execute binaries outside the
+# bundle). Route URL opening through Qt's QDesktopServices, which uses
+# LaunchServices and is permitted in the sandbox. This also works fine for the
+# non-sandboxed DMG build.
+import webbrowser
+
+
+def _open_url_via_qt(url, *args, **kwargs):
+    from qtpy.QtCore import QUrl
+    from qtpy.QtGui import QDesktopServices
+
+    return QDesktopServices.openUrl(QUrl(url))
+
+
+webbrowser.open = _open_url_via_qt
+
 from pywwt import qt
 from glue import load_plugins
 from glue.logger import logger
