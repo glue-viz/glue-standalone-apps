@@ -154,3 +154,109 @@ jobs:
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+  # Mac App Store build.
+  #
+  # This is a separate, sandboxed build that is signed with the "Apple
+  # Distribution" / "3rd Party Mac Developer Application" certificate and
+  # packaged as a signed .pkg, rather than the notarized DMG produced above. It
+  # only runs on tag pushes so it does not slow down ordinary branch/PR builds,
+  # and it does not touch the DMG artifacts.
+  #
+  # In addition to the secrets used by the DMG build it needs:
+  #   MAC_APP_DIST_CERT / MAC_APP_DIST_PASSWORD
+  #       base64 + password for the "Apple Distribution" (a.k.a. "3rd Party Mac
+  #       Developer Application") certificate used to sign the app.
+  #   MAC_APP_DISTRIBUTION
+  #       common name of that same certificate, used as the codesign identity.
+  #   MAC_INSTALLER_DISTRIBUTION
+  #       common name of the "3rd Party Mac Developer Installer" certificate
+  #       (imported here from the existing MAC_INST_DIST_CERT secret), used as
+  #       the productsign identity.
+  # TEAM_ID, KEYCHAIN_PASSWORD, MAC_INST_DIST_CERT/PASSWORD, NOTARIZATION_*
+  # are reused from the DMG build.
+  build_appstore:
+    name: macos-appstore
+    runs-on: macos-14
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && github.repository == 'glue-viz/glue-standalone-apps'
+    steps:
+
+    - name: Determine name of build
+      shell: bash
+      run: echo "BRANCH_NAME=${GITHUB_REF_NAME}" >> $GITHUB_ENV
+
+    - name: Import Apple Distribution Certificate
+      uses: apple-actions/import-codesign-certs@v1
+      with:
+        p12-file-base64: ${{ secrets.MAC_APP_DIST_CERT }}
+        p12-password: ${{ secrets.MAC_APP_DIST_PASSWORD }}
+        keychain-password: ${{ secrets.KEYCHAIN_PASSWORD }}
+
+    - name: Import Mac Installer Distribution Certificate
+      uses: apple-actions/import-codesign-certs@v1
+      with:
+        p12-file-base64: ${{ secrets.MAC_INST_DIST_CERT }}
+        p12-password: ${{ secrets.MAC_INST_DIST_PASSWORD }}
+        create-keychain: false
+        keychain-password: ${{ secrets.KEYCHAIN_PASSWORD }}
+
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.11
+
+    - name: Install Python dependencies
+      run: pip install -r requirements.txt --no-cache-dir
+
+    - name: Uninstall debugpy
+      run: pip uninstall -y debugpy
+
+    - name: Uninstall joblib
+      run: pip uninstall -y joblib
+
+    - name: Run pyinstaller
+      run: pyinstaller glue_app.spec
+
+    - name: Simple test of MacOS X application
+      run: dist/glue.app/Contents/MacOS/start_glue --test
+
+    - name: Rename MacOS X application
+      run: mv dist/glue.app dist/"glue ${BRANCH_NAME}.app"
+
+    - name: Remove start_glue
+      run: rm -rf dist/start_glue
+
+    - name: Sign application for the App Store
+      run: |
+        osx/sign_app_store.sh \
+          dist/"glue ${BRANCH_NAME}.app" \
+          "${{ secrets.MAC_APP_DISTRIBUTION }}" \
+          "${{ secrets.TEAM_ID }}" \
+          io.gluesolutions.glueviz
+
+    - name: Build MacOS X installer for distribution
+      run: productbuild --component dist/"glue ${BRANCH_NAME}.app" /Applications dist/"glue ${BRANCH_NAME}_unsigned.pkg"
+
+    - name: Sign MacOS X installer for distribution
+      run: productsign --sign "${{ secrets.MAC_INSTALLER_DISTRIBUTION }}" dist/"glue ${BRANCH_NAME}_unsigned.pkg" dist/"glue ${BRANCH_NAME}.pkg"
+
+    - name: Remove unsigned pkg and app
+      run: |
+        rm -rf dist/"glue ${BRANCH_NAME}_unsigned.pkg"
+        rm -rf dist/*.app
+
+    - name: Validate pkg for the App Store
+      run: xcrun altool --validate-app -f dist/"glue ${BRANCH_NAME}.pkg" --type osx --username ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }}
+
+    - name: Install awscli
+      run: pip install awscli
+
+    - name: Upload pkg to S3
+      shell: bash
+      run: aws s3 cp dist/ s3://glueviz/installers/${BRANCH_NAME}/appstore/ --recursive
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
