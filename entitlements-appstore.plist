@@ -8,19 +8,16 @@
   sandboxed; the App Store build is sandboxed and does not need the cs.* hardened
   runtime exceptions.
 
-  __TEAM_ID__ is substituted with the Apple Developer Team ID by
-  osx/sign_app_store.sh at signing time. The application group is what lets the
-  sandboxed main app and the QtWebEngineProcess helper talk to each other over
-  mach ports (see osx/sign_app_store.sh and entitlements-helper.plist).
+  Note: there is deliberately no application-group entitlement here. It is only
+  needed if QtWebEngine's helper IPC turns out to require it under the sandbox;
+  if the WWT viewer fails with a mach-port/IPC error, re-add
+  com.apple.security.application-groups (matching entitlements-helper.plist),
+  register the group in the Developer portal, and include it in the profile.
 -->
 <plist version="1.0">
 <dict>
 	<key>com.apple.security.app-sandbox</key>
 	<true/>
-	<key>com.apple.security.application-groups</key>
-	<array>
-		<string>__TEAM_ID__.io.gluesolutions.glueviz</string>
-	</array>
 	<!-- glue loads data over the network (HiPS, WWT, remote catalogues). -->
 	<key>com.apple.security.network.client</key>
 	<true/>
