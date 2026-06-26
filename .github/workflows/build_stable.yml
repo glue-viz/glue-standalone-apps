@@ -333,7 +333,11 @@ jobs:
         rm -rf dist/*.app
 
     - name: Validate pkg for the App Store
-      run: xcrun altool --validate-app -f dist/"glue ${BRANCH_NAME}.pkg" --type osx --username ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }}
+      # Keep --password last: the NOTARIZATION_PASSWORD secret carries a trailing
+      # newline, so any argument placed after it gets split onto its own line and
+      # run as a stray command. This mirrors the working notarytool command in
+      # the DMG job, where --password is also last.
+      run: xcrun altool --validate-app -f dist/"glue ${BRANCH_NAME}.pkg" --type osx --username ${{ secrets.NOTARIZATION_USERNAME }} --team-id ${{ secrets.TEAM_ID }} --password ${{ secrets.NOTARIZATION_PASSWORD }}
 
     - name: Install awscli
       run: pip install awscli
