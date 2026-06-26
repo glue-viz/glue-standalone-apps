@@ -112,6 +112,10 @@ else:
         "CFBundleShortVersionString": VERSION,
         "NSHighResolutionCapable": "True",
         "LSApplicationCategoryType": "public.app-category.education",
+        # glue only uses standard, exempt encryption (HTTPS/TLS for downloads),
+        # so declare no non-exempt encryption. This stops App Store Connect from
+        # asking the export-compliance question on every upload.
+        "ITSAppUsesNonExemptEncryption": False,
         "CFBundleDocumentTypes": [
             {
                 "CFBundleTypeName": "Glue Session Files",
