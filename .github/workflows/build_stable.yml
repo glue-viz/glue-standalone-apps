@@ -293,10 +293,16 @@ jobs:
     - name: Sign MacOS X installer for distribution
       shell: bash
       run: |
+        echo "== Keychains in search list =="
+        security list-keychains
         echo "== Codesigning identities (app signing) =="
         security find-identity -v -p codesigning || true
-        echo "== Basic-policy identities (includes installer certs) =="
+        echo "== Valid basic-policy identities (includes installer certs) =="
         security find-identity -v -p basic || true
+        echo "== ALL basic-policy identities incl. invalid/expired =="
+        security find-identity -p basic || true
+        echo "== Certificate labels in the search list =="
+        security find-certificate -a | grep -E '"(labl|subj)"' || true
         # Discover the App Store installer identity from the keychain by
         # certificate type rather than relying on an exact common-name string in
         # a secret (which has never been exercised before and is easy to get
