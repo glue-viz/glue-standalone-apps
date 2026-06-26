@@ -160,8 +160,9 @@ jobs:
   # This is a separate, sandboxed build that is signed with the "Apple
   # Distribution" / "3rd Party Mac Developer Application" certificate and
   # packaged as a signed .pkg, rather than the notarized DMG produced above. It
-  # only runs on tag pushes so it does not slow down ordinary branch/PR builds,
-  # and it does not touch the DMG artifacts.
+  # runs on direct pushes to branches and tags, but not on pull requests (which
+  # do not have access to the signing secrets), and it does not touch the DMG
+  # artifacts.
   #
   # In addition to the secrets used by the DMG build it needs:
   #   MAC_APP_DIST_CERT / MAC_APP_DIST_PASSWORD
@@ -228,7 +229,10 @@ jobs:
     name: macos-appstore
     runs-on: macos-14
     needs: check_appstore_secrets
-    if: needs.check_appstore_secrets.outputs.available == 'true' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && github.repository == 'glue-viz/glue-standalone-apps'
+    # Runs on any direct push (branches and tags) but not on pull requests, which
+    # lack the signing secrets. github.event_name == 'push' covers both branch
+    # and tag pushes and excludes pull_request events.
+    if: needs.check_appstore_secrets.outputs.available == 'true' && github.event_name == 'push' && github.repository == 'glue-viz/glue-standalone-apps'
     steps:
 
     - name: Determine name of build
@@ -279,8 +283,13 @@ jobs:
     - name: Simple test of MacOS X application
       run: dist/glue.app/Contents/MacOS/start_glue --test
 
+    # Use a fixed bundle name (not the branch/tag) so the app always installs to
+    # /Applications/glueviz.app and the App Store updates it in place across
+    # versions. The version is carried by CFBundleShortVersionString, and the
+    # versioned name is kept only on the .pkg artifact below. This matches
+    # CFBundleName / CFBundleDisplayName ("glueviz").
     - name: Rename MacOS X application
-      run: mv dist/glue.app dist/"glue ${BRANCH_NAME}.app"
+      run: mv dist/glue.app dist/glueviz.app
 
     - name: Remove start_glue
       run: rm -rf dist/start_glue
@@ -288,13 +297,13 @@ jobs:
     - name: Sign application for the App Store
       run: |
         osx/sign_app_store.sh \
-          dist/"glue ${BRANCH_NAME}.app" \
+          dist/glueviz.app \
           "${{ secrets.MAC_APP_DISTRIBUTION }}" \
           "${{ secrets.TEAM_ID }}" \
           io.gluesolutions.glueviz
 
     - name: Build MacOS X installer for distribution
-      run: productbuild --component dist/"glue ${BRANCH_NAME}.app" /Applications dist/"glue ${BRANCH_NAME}_unsigned.pkg"
+      run: productbuild --component dist/glueviz.app /Applications dist/"glue ${BRANCH_NAME}_unsigned.pkg"
 
     - name: Sign MacOS X installer for distribution
       shell: bash

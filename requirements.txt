@@ -17,10 +17,10 @@ pyavm
 astrodendro
 pywwt
 notebook
-PyQt6==6.6.*
-PyQt6-Qt6==6.6.*
-PyQt6-WebEngine==6.6.*
-PyQt6-WebEngine-Qt6==6.6.*
+# PySide6 (LGPL) rather than PyQt6 (GPL) so the bundle can be distributed on the
+# Mac App Store. The PySide6 meta-package pulls in PySide6-Essentials and
+# PySide6-Addons, the latter providing QtWebEngine (needed by glue-wwt).
+PySide6==6.6.*
 vispy==0.15.*
 
 # Pin matplotlib <3.10.9 so as to avoid an incompatibility with pyinstaller

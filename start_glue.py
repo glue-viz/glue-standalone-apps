@@ -11,6 +11,39 @@ for arg in sys.argv:
 import os
 import time
 
+# Force qtpy (and therefore glue, pywwt and vispy) to use PySide6, the LGPL
+# binding that this bundle ships, before anything triggers a Qt import.
+os.environ["QT_API"] = "pyside6"
+
+# The macOS App Store sandbox denies reading the system mimetypes files such as
+# /etc/apache2/mime.types (they exist but live outside the sandbox container),
+# and Python's mimetypes.init() does not guard against the resulting
+# PermissionError - it propagates and crashes pywwt's local data server when the
+# WWT viewer opens. Initialise the database from the built-in type map only and
+# stop it reading any system files; pywwt registers the extra types it needs via
+# mimetypes.add_type.
+import mimetypes
+
+mimetypes.knownfiles = []
+mimetypes.init()
+
+# webbrowser.open() launches the default browser by spawning /usr/bin/open,
+# which the App Store sandbox blocks (it may not execute binaries outside the
+# bundle). Route URL opening through Qt's QDesktopServices, which uses
+# LaunchServices and is permitted in the sandbox. This also works fine for the
+# non-sandboxed DMG build.
+import webbrowser
+
+
+def _open_url_via_qt(url, *args, **kwargs):
+    from qtpy.QtCore import QUrl
+    from qtpy.QtGui import QDesktopServices
+
+    return QDesktopServices.openUrl(QUrl(url))
+
+
+webbrowser.open = _open_url_via_qt
+
 from pywwt import qt
 from glue import load_plugins
 from glue.logger import logger

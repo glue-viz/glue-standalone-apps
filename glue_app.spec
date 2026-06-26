@@ -49,7 +49,7 @@ a = Analysis(
         "pyavm",
         "pvextractor",
         "astrodendro",
-        "PyQt6.QtTest",
+        "PySide6.QtTest",
     ],
     hookspath=["hooks"],
     hooksconfig={
@@ -58,7 +58,8 @@ a = Analysis(
     runtime_hooks=[],
     excludes=[
         "tkinter",
-        "PyQt5.QtQml",
+        "PyQt5",
+        "PyQt6",
         "joblib",
     ],
     win_no_prefer_redirects=False,
