@@ -11,6 +11,10 @@ for arg in sys.argv:
 import os
 import time
 
+# Force qtpy (and therefore glue, pywwt and vispy) to use PySide6, the LGPL
+# binding that this bundle ships, before anything triggers a Qt import.
+os.environ["QT_API"] = "pyside6"
+
 from pywwt import qt
 from glue import load_plugins
 from glue.logger import logger
