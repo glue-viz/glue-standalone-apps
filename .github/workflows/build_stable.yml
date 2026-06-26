@@ -197,7 +197,6 @@ jobs:
         MAC_APP_DISTRIBUTION: ${{ secrets.MAC_APP_DISTRIBUTION }}
         MAC_INST_DIST_CERT: ${{ secrets.MAC_INST_DIST_CERT }}
         MAC_INST_DIST_PASSWORD: ${{ secrets.MAC_INST_DIST_PASSWORD }}
-        MAC_INSTALLER_DISTRIBUTION: ${{ secrets.MAC_INSTALLER_DISTRIBUTION }}
         TEAM_ID: ${{ secrets.TEAM_ID }}
         KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         NOTARIZATION_USERNAME: ${{ secrets.NOTARIZATION_USERNAME }}
@@ -208,7 +207,7 @@ jobs:
         missing=0
         for name in \
           MAC_APP_DIST_CERT MAC_APP_DIST_PASSWORD MAC_APP_DISTRIBUTION \
-          MAC_INST_DIST_CERT MAC_INST_DIST_PASSWORD MAC_INSTALLER_DISTRIBUTION \
+          MAC_INST_DIST_CERT MAC_INST_DIST_PASSWORD \
           TEAM_ID KEYCHAIN_PASSWORD NOTARIZATION_USERNAME NOTARIZATION_PASSWORD \
           AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY; do
           if [ -n "${!name}" ]; then
@@ -292,7 +291,29 @@ jobs:
       run: productbuild --component dist/"glue ${BRANCH_NAME}.app" /Applications dist/"glue ${BRANCH_NAME}_unsigned.pkg"
 
     - name: Sign MacOS X installer for distribution
-      run: productsign --sign "${{ secrets.MAC_INSTALLER_DISTRIBUTION }}" dist/"glue ${BRANCH_NAME}_unsigned.pkg" dist/"glue ${BRANCH_NAME}.pkg"
+      shell: bash
+      run: |
+        echo "== Codesigning identities (app signing) =="
+        security find-identity -v -p codesigning || true
+        echo "== Basic-policy identities (includes installer certs) =="
+        security find-identity -v -p basic || true
+        # Discover the App Store installer identity from the keychain by
+        # certificate type rather than relying on an exact common-name string in
+        # a secret (which has never been exercised before and is easy to get
+        # wrong). We want the "3rd Party Mac Developer Installer" cert and must
+        # not pick up a "Developer ID Installer" cert, which is for notarized
+        # distribution outside the App Store. productsign accepts the SHA-1 hash.
+        INSTALLER_HASH=$(security find-identity -v -p basic \
+          | grep -i 'Installer' | grep -v 'Developer ID' \
+          | head -1 | awk '{print $2}')
+        if [ -z "$INSTALLER_HASH" ]; then
+          echo "::error::No App Store installer signing identity found in the keychain. The .p12 in MAC_INST_DIST_CERT must be a valid '3rd Party Mac Developer Installer' (a.k.a. 'Mac Installer Distribution') certificate, including its private key and not expired. See the identity list above."
+          exit 1
+        fi
+        echo "Using installer identity $INSTALLER_HASH"
+        productsign --sign "$INSTALLER_HASH" \
+          dist/"glue ${BRANCH_NAME}_unsigned.pkg" \
+          dist/"glue ${BRANCH_NAME}.pkg"
 
     - name: Remove unsigned pkg and app
       run: |
