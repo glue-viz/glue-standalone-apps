@@ -14,6 +14,7 @@ glue-plotly>=0.13.0
 glue-ar>=0.6.0
 pvextractor>=0.4
 pyavm
+astrodendro
 pywwt
 notebook
 PyQt6==6.6.*
