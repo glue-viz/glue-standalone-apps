@@ -175,10 +175,35 @@ jobs:
   #       the productsign identity.
   # TEAM_ID, KEYCHAIN_PASSWORD, MAC_INST_DIST_CERT/PASSWORD, NOTARIZATION_*
   # are reused from the DMG build.
+  # Cheap gate so the expensive macOS App Store job is skipped (not failed)
+  # when the signing secrets are not configured. The `secrets` context cannot be
+  # used in a job-level `if:`, so we surface their presence as a job output and
+  # gate build_appstore on it via `needs`.
+  check_appstore_secrets:
+    name: check-appstore-secrets
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.repository == 'glue-viz/glue-standalone-apps'
+    outputs:
+      available: ${{ steps.check.outputs.available }}
+    steps:
+    - id: check
+      env:
+        MAC_APP_DIST_CERT: ${{ secrets.MAC_APP_DIST_CERT }}
+        MAC_APP_DISTRIBUTION: ${{ secrets.MAC_APP_DISTRIBUTION }}
+        MAC_INSTALLER_DISTRIBUTION: ${{ secrets.MAC_INSTALLER_DISTRIBUTION }}
+      run: |
+        if [[ -n "$MAC_APP_DIST_CERT" && -n "$MAC_APP_DISTRIBUTION" && -n "$MAC_INSTALLER_DISTRIBUTION" ]]; then
+          echo "available=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "available=false" >> "$GITHUB_OUTPUT"
+          echo "::warning::App Store signing secrets are not set; skipping the macos-appstore build."
+        fi
+
   build_appstore:
     name: macos-appstore
     runs-on: macos-14
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && github.repository == 'glue-viz/glue-standalone-apps'
+    needs: check_appstore_secrets
+    if: needs.check_appstore_secrets.outputs.available == 'true' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && github.repository == 'glue-viz/glue-standalone-apps'
     steps:
 
     - name: Determine name of build
