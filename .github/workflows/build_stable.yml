@@ -268,7 +268,13 @@ jobs:
       run: pip uninstall -y joblib
 
     - name: Run pyinstaller
+      # Apple only accepts an arm64-only build (which is what the macos-14
+      # runner produces) if the deployment target is macOS 12.0 or higher, and
+      # the App Store requires LSMinimumSystemVersion to be set. The spec picks
+      # this up and writes it into the bundle's Info.plist.
       run: pyinstaller glue_app.spec
+      env:
+        MACOS_MIN_VERSION: "12.0"
 
     - name: Simple test of MacOS X application
       run: dist/glue.app/Contents/MacOS/start_glue --test
