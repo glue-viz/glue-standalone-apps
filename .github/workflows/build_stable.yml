@@ -187,16 +187,42 @@ jobs:
       available: ${{ steps.check.outputs.available }}
     steps:
     - id: check
+      shell: bash
+      # Every secret the build_appstore job consumes. The value of each secret is
+      # mapped to an env var of the same name so the step can test for presence
+      # without ever printing the value (only "set" / "MISSING" is logged).
       env:
         MAC_APP_DIST_CERT: ${{ secrets.MAC_APP_DIST_CERT }}
+        MAC_APP_DIST_PASSWORD: ${{ secrets.MAC_APP_DIST_PASSWORD }}
         MAC_APP_DISTRIBUTION: ${{ secrets.MAC_APP_DISTRIBUTION }}
+        MAC_INST_DIST_CERT: ${{ secrets.MAC_INST_DIST_CERT }}
+        MAC_INST_DIST_PASSWORD: ${{ secrets.MAC_INST_DIST_PASSWORD }}
         MAC_INSTALLER_DISTRIBUTION: ${{ secrets.MAC_INSTALLER_DISTRIBUTION }}
+        TEAM_ID: ${{ secrets.TEAM_ID }}
+        KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        NOTARIZATION_USERNAME: ${{ secrets.NOTARIZATION_USERNAME }}
+        NOTARIZATION_PASSWORD: ${{ secrets.NOTARIZATION_PASSWORD }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       run: |
-        if [[ -n "$MAC_APP_DIST_CERT" && -n "$MAC_APP_DISTRIBUTION" && -n "$MAC_INSTALLER_DISTRIBUTION" ]]; then
+        missing=0
+        for name in \
+          MAC_APP_DIST_CERT MAC_APP_DIST_PASSWORD MAC_APP_DISTRIBUTION \
+          MAC_INST_DIST_CERT MAC_INST_DIST_PASSWORD MAC_INSTALLER_DISTRIBUTION \
+          TEAM_ID KEYCHAIN_PASSWORD NOTARIZATION_USERNAME NOTARIZATION_PASSWORD \
+          AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY; do
+          if [ -n "${!name}" ]; then
+            echo "  $name: set"
+          else
+            echo "  $name: MISSING"
+            missing=1
+          fi
+        done
+        if [ "$missing" -eq 0 ]; then
           echo "available=true" >> "$GITHUB_OUTPUT"
         else
           echo "available=false" >> "$GITHUB_OUTPUT"
-          echo "::warning::App Store signing secrets are not set; skipping the macos-appstore build."
+          echo "::warning::One or more secrets needed by the App Store build are missing (see the list above); skipping the macos-appstore build."
         fi
 
   build_appstore:
