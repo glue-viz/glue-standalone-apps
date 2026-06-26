@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Entitlements for the bundled QtWebEngineProcess.app helper in the sandboxed
+  App Store build.
+
+  Qt launches QtWebEngineProcess as a separate executable and talks to it over
+  mach ports. Inside the sandbox those ports are only reachable when both the
+  main app and the helper declare the same application group, so the group here
+  must match the one in entitlements-appstore.plist.
+
+  com.apple.security.inherit makes the helper inherit the parent app's sandbox
+  rather than defining its own resource access; this is the combination Qt
+  documents for QtWebEngineProcess on the Mac App Store.
+
+  __TEAM_ID__ is substituted by osx/sign_app_store.sh at signing time.
+-->
+<plist version="1.0">
+<dict>
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	<key>com.apple.security.inherit</key>
+	<true/>
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>__TEAM_ID__.io.gluesolutions.glueviz</string>
+	</array>
+</dict>
+</plist>

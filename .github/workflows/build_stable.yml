@@ -154,3 +154,197 @@ jobs:
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+  # Mac App Store build.
+  #
+  # This is a separate, sandboxed build that is signed with the "Apple
+  # Distribution" / "3rd Party Mac Developer Application" certificate and
+  # packaged as a signed .pkg, rather than the notarized DMG produced above. It
+  # only runs on tag pushes so it does not slow down ordinary branch/PR builds,
+  # and it does not touch the DMG artifacts.
+  #
+  # In addition to the secrets used by the DMG build it needs:
+  #   MAC_APP_DIST_CERT / MAC_APP_DIST_PASSWORD
+  #       base64 + password for the "Apple Distribution" (a.k.a. "3rd Party Mac
+  #       Developer Application") certificate used to sign the app.
+  #   MAC_APP_DISTRIBUTION
+  #       common name of that same certificate, used as the codesign identity.
+  #   MAC_INSTALLER_DISTRIBUTION
+  #       common name of the "3rd Party Mac Developer Installer" certificate
+  #       (imported here from the existing MAC_INST_DIST_CERT secret), used as
+  #       the productsign identity.
+  # TEAM_ID, KEYCHAIN_PASSWORD, MAC_INST_DIST_CERT/PASSWORD, NOTARIZATION_*
+  # are reused from the DMG build.
+  # Cheap gate so the expensive macOS App Store job is skipped (not failed)
+  # when the signing secrets are not configured. The `secrets` context cannot be
+  # used in a job-level `if:`, so we surface their presence as a job output and
+  # gate build_appstore on it via `needs`.
+  check_appstore_secrets:
+    name: check-appstore-secrets
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.repository == 'glue-viz/glue-standalone-apps'
+    outputs:
+      available: ${{ steps.check.outputs.available }}
+    steps:
+    - id: check
+      shell: bash
+      # Every secret the build_appstore job consumes. The value of each secret is
+      # mapped to an env var of the same name so the step can test for presence
+      # without ever printing the value (only "set" / "MISSING" is logged).
+      env:
+        MAC_APP_DIST_CERT: ${{ secrets.MAC_APP_DIST_CERT }}
+        MAC_APP_DIST_PASSWORD: ${{ secrets.MAC_APP_DIST_PASSWORD }}
+        MAC_APP_DISTRIBUTION: ${{ secrets.MAC_APP_DISTRIBUTION }}
+        MAC_INST_DIST_CERT: ${{ secrets.MAC_INST_DIST_CERT }}
+        MAC_INST_DIST_PASSWORD: ${{ secrets.MAC_INST_DIST_PASSWORD }}
+        TEAM_ID: ${{ secrets.TEAM_ID }}
+        KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        NOTARIZATION_USERNAME: ${{ secrets.NOTARIZATION_USERNAME }}
+        NOTARIZATION_PASSWORD: ${{ secrets.NOTARIZATION_PASSWORD }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      run: |
+        missing=0
+        for name in \
+          MAC_APP_DIST_CERT MAC_APP_DIST_PASSWORD MAC_APP_DISTRIBUTION \
+          MAC_INST_DIST_CERT MAC_INST_DIST_PASSWORD \
+          TEAM_ID KEYCHAIN_PASSWORD NOTARIZATION_USERNAME NOTARIZATION_PASSWORD \
+          AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY; do
+          if [ -n "${!name}" ]; then
+            echo "  $name: set"
+          else
+            echo "  $name: MISSING"
+            missing=1
+          fi
+        done
+        if [ "$missing" -eq 0 ]; then
+          echo "available=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "available=false" >> "$GITHUB_OUTPUT"
+          echo "::warning::One or more secrets needed by the App Store build are missing (see the list above); skipping the macos-appstore build."
+        fi
+
+  build_appstore:
+    name: macos-appstore
+    runs-on: macos-14
+    needs: check_appstore_secrets
+    if: needs.check_appstore_secrets.outputs.available == 'true' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && github.repository == 'glue-viz/glue-standalone-apps'
+    steps:
+
+    - name: Determine name of build
+      shell: bash
+      run: echo "BRANCH_NAME=${GITHUB_REF_NAME}" >> $GITHUB_ENV
+
+    - name: Import Apple Distribution Certificate
+      uses: apple-actions/import-codesign-certs@v1
+      with:
+        p12-file-base64: ${{ secrets.MAC_APP_DIST_CERT }}
+        p12-password: ${{ secrets.MAC_APP_DIST_PASSWORD }}
+        keychain-password: ${{ secrets.KEYCHAIN_PASSWORD }}
+
+    - name: Import Mac Installer Distribution Certificate
+      uses: apple-actions/import-codesign-certs@v1
+      with:
+        p12-file-base64: ${{ secrets.MAC_INST_DIST_CERT }}
+        p12-password: ${{ secrets.MAC_INST_DIST_PASSWORD }}
+        create-keychain: false
+        keychain-password: ${{ secrets.KEYCHAIN_PASSWORD }}
+
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.11
+
+    - name: Install Python dependencies
+      run: pip install -r requirements.txt --no-cache-dir
+
+    - name: Uninstall debugpy
+      run: pip uninstall -y debugpy
+
+    - name: Uninstall joblib
+      run: pip uninstall -y joblib
+
+    - name: Run pyinstaller
+      # Apple only accepts an arm64-only build (which is what the macos-14
+      # runner produces) if the deployment target is macOS 12.0 or higher, and
+      # the App Store requires LSMinimumSystemVersion to be set. The spec picks
+      # this up and writes it into the bundle's Info.plist.
+      run: pyinstaller glue_app.spec
+      env:
+        MACOS_MIN_VERSION: "12.0"
+
+    - name: Simple test of MacOS X application
+      run: dist/glue.app/Contents/MacOS/start_glue --test
+
+    - name: Rename MacOS X application
+      run: mv dist/glue.app dist/"glue ${BRANCH_NAME}.app"
+
+    - name: Remove start_glue
+      run: rm -rf dist/start_glue
+
+    - name: Sign application for the App Store
+      run: |
+        osx/sign_app_store.sh \
+          dist/"glue ${BRANCH_NAME}.app" \
+          "${{ secrets.MAC_APP_DISTRIBUTION }}" \
+          "${{ secrets.TEAM_ID }}" \
+          io.gluesolutions.glueviz
+
+    - name: Build MacOS X installer for distribution
+      run: productbuild --component dist/"glue ${BRANCH_NAME}.app" /Applications dist/"glue ${BRANCH_NAME}_unsigned.pkg"
+
+    - name: Sign MacOS X installer for distribution
+      shell: bash
+      run: |
+        echo "== Keychains in search list =="
+        security list-keychains
+        echo "== Codesigning identities (app signing) =="
+        security find-identity -v -p codesigning || true
+        echo "== Valid basic-policy identities (includes installer certs) =="
+        security find-identity -v -p basic || true
+        echo "== ALL basic-policy identities incl. invalid/expired =="
+        security find-identity -p basic || true
+        echo "== Certificate labels in the search list =="
+        security find-certificate -a | grep -E '"(labl|subj)"' || true
+        # Discover the App Store installer identity from the keychain by
+        # certificate type rather than relying on an exact common-name string in
+        # a secret (which has never been exercised before and is easy to get
+        # wrong). We want the "3rd Party Mac Developer Installer" cert and must
+        # not pick up a "Developer ID Installer" cert, which is for notarized
+        # distribution outside the App Store. productsign accepts the SHA-1 hash.
+        INSTALLER_HASH=$(security find-identity -v -p basic \
+          | grep -i 'Installer' | grep -v 'Developer ID' \
+          | head -1 | awk '{print $2}')
+        if [ -z "$INSTALLER_HASH" ]; then
+          echo "::error::No App Store installer signing identity found in the keychain. The .p12 in MAC_INST_DIST_CERT must be a valid '3rd Party Mac Developer Installer' (a.k.a. 'Mac Installer Distribution') certificate, including its private key and not expired. See the identity list above."
+          exit 1
+        fi
+        echo "Using installer identity $INSTALLER_HASH"
+        productsign --sign "$INSTALLER_HASH" \
+          dist/"glue ${BRANCH_NAME}_unsigned.pkg" \
+          dist/"glue ${BRANCH_NAME}.pkg"
+
+    - name: Remove unsigned pkg and app
+      run: |
+        rm -rf dist/"glue ${BRANCH_NAME}_unsigned.pkg"
+        rm -rf dist/*.app
+
+    - name: Validate pkg for the App Store
+      # Keep --password last: the NOTARIZATION_PASSWORD secret carries a trailing
+      # newline, so any argument placed after it gets split onto its own line and
+      # run as a stray command. This mirrors the working notarytool command in
+      # the DMG job, where --password is also last.
+      run: xcrun altool --validate-app -f dist/"glue ${BRANCH_NAME}.pkg" --type osx --username ${{ secrets.NOTARIZATION_USERNAME }} --team-id ${{ secrets.TEAM_ID }} --password ${{ secrets.NOTARIZATION_PASSWORD }}
+
+    - name: Install awscli
+      run: pip install awscli
+
+    - name: Upload pkg to S3
+      shell: bash
+      run: aws s3 cp dist/ s3://glueviz/installers/${BRANCH_NAME}/appstore/ --recursive
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

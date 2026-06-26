@@ -15,6 +15,12 @@ if glue_version.count(".") == 2:
 else:
     VERSION = "1.0.0"
 
+# Apple requires arm64-only macOS apps to declare a deployment target of 12.0 or
+# higher, and the App Store also requires LSMinimumSystemVersion to be present.
+# This is set only for the App Store build (via the env var) so the DMG build's
+# minimum OS is left unchanged.
+MACOS_MIN_VERSION = os.environ.get("MACOS_MIN_VERSION")
+
 if os.name == "nt":
     icon = os.path.abspath("icon.ico")
     onefile = True
@@ -98,24 +104,29 @@ else:
         exe, a.binaries, a.zipfiles, a.datas, strip=False, upx=False, name="start_glue"
     )
 
+    info_plist = {
+        "CFBundleName": "glueviz",
+        "CFBundleDisplayName": "glueviz",
+        "CFBundleVersion": VERSION,
+        "CFBundleShortVersionString": VERSION,
+        "NSHighResolutionCapable": "True",
+        "LSApplicationCategoryType": "public.app-category.education",
+        "CFBundleDocumentTypes": [
+            {
+                "CFBundleTypeName": "Glue Session Files",
+                "CFBundleTypeExtensions": ["glu"],
+                "CFBundleTypeRole": "Viewer",
+            }
+        ],
+    }
+
+    if MACOS_MIN_VERSION:
+        info_plist["LSMinimumSystemVersion"] = MACOS_MIN_VERSION
+
     app = BUNDLE(
         coll,
         name="glue.app",
         icon=icon,
-        info_plist={
-            "CFBundleName": "glueviz",
-            "CFBundleDisplayName": "glueviz",
-            "CFBundleVersion": VERSION,
-            "CFBundleShortVersionString": VERSION,
-            "NSHighResolutionCapable": "True",
-            "LSApplicationCategoryType": "public.app-category.education",
-            "CFBundleDocumentTypes": [
-                {
-                    "CFBundleTypeName": "Glue Session Files",
-                    "CFBundleTypeExtensions": ["glu"],
-                    "CFBundleTypeRole": "Viewer",
-                }
-            ],
-        },
+        info_plist=info_plist,
         bundle_identifier="io.gluesolutions.glueviz",
     )
