@@ -196,6 +196,7 @@ jobs:
         MAC_APP_DIST_CERT: ${{ secrets.MAC_APP_DIST_CERT }}
         MAC_APP_DIST_PASSWORD: ${{ secrets.MAC_APP_DIST_PASSWORD }}
         MAC_APP_DISTRIBUTION: ${{ secrets.MAC_APP_DISTRIBUTION }}
+        MAC_APP_PROVISION_PROFILE: ${{ secrets.MAC_APP_PROVISION_PROFILE }}
         MAC_INST_DIST_CERT: ${{ secrets.MAC_INST_DIST_CERT }}
         MAC_INST_DIST_PASSWORD: ${{ secrets.MAC_INST_DIST_PASSWORD }}
         TEAM_ID: ${{ secrets.TEAM_ID }}
@@ -208,6 +209,7 @@ jobs:
         missing=0
         for name in \
           MAC_APP_DIST_CERT MAC_APP_DIST_PASSWORD MAC_APP_DISTRIBUTION \
+          MAC_APP_PROVISION_PROFILE \
           MAC_INST_DIST_CERT MAC_INST_DIST_PASSWORD \
           TEAM_ID KEYCHAIN_PASSWORD NOTARIZATION_USERNAME NOTARIZATION_PASSWORD \
           AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY; do
@@ -293,6 +295,16 @@ jobs:
 
     - name: Remove start_glue
       run: rm -rf dist/start_glue
+
+    # Mac App Store / TestFlight builds must carry an embedded provisioning
+    # profile. It has to be in place before the app is signed so the signature
+    # covers it. MAC_APP_PROVISION_PROFILE is the base64 of a "Mac App Store"
+    # distribution profile for io.gluesolutions.glueviz, tied to the Apple
+    # Distribution certificate and including the application group.
+    - name: Embed provisioning profile
+      run: |
+        echo "${{ secrets.MAC_APP_PROVISION_PROFILE }}" | base64 --decode > dist/glueviz.app/Contents/embedded.provisionprofile
+        ls -l dist/glueviz.app/Contents/embedded.provisionprofile
 
     - name: Sign application for the App Store
       run: |

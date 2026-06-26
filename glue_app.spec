@@ -117,6 +117,8 @@ else:
                 "CFBundleTypeName": "Glue Session Files",
                 "CFBundleTypeExtensions": ["glu"],
                 "CFBundleTypeRole": "Viewer",
+                # glue defines the .glu session format, so it is the owner.
+                "LSHandlerRank": "Owner",
             }
         ],
     }
