@@ -39,6 +39,7 @@ a = Analysis(
         "glue_qt",
         "glue_wwt",
         "glue_plotly",
+        "glue_astronomy",
         "pyavm",
         "pvextractor",
         "astrodendro",
