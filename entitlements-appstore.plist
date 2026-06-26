@@ -8,6 +8,12 @@
   sandboxed; the App Store build is sandboxed and does not need the cs.* hardened
   runtime exceptions.
 
+  The application-identifier and team-identifier must match the embedded
+  provisioning profile and the App ID, otherwise the build is not eligible for
+  TestFlight. (Xcode injects these automatically; we sign by hand so we set them
+  here.) __TEAM_ID__ is substituted with the Apple Developer Team ID by
+  osx/sign_app_store.sh at signing time.
+
   Note: there is deliberately no application-group entitlement here. It is only
   needed if QtWebEngine's helper IPC turns out to require it under the sandbox;
   if the WWT viewer fails with a mach-port/IPC error, re-add
@@ -16,6 +22,10 @@
 -->
 <plist version="1.0">
 <dict>
+	<key>com.apple.application-identifier</key>
+	<string>__TEAM_ID__.io.gluesolutions.glueviz</string>
+	<key>com.apple.developer.team-identifier</key>
+	<string>__TEAM_ID__</string>
 	<key>com.apple.security.app-sandbox</key>
 	<true/>
 	<!-- glue loads data over the network (HiPS, WWT, remote catalogues). -->
